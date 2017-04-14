@@ -17,11 +17,11 @@ Written and maintained by [@s1kx](https://github.com/s1kx) and [@sciencefyll](ht
 ## Project status
 The different labels of this repository.
  - [Bug](https://github.com/s1kx/unison/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aopen%20label%3Abug%20)
- - [Duplicate](https://github.com/s1kx/unison/issues?q=is%3Aissue+is%3Aopen+label%3Aduplicate)
+ - [Question](https://github.com/s1kx/unison/issues?q=is%3Aopen+is%3Aissue+label%3Aquestion)
  - [Enhancement](https://github.com/s1kx/unison/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
  - [Help wanted](https://github.com/s1kx/unison/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+ - [Duplicate](https://github.com/s1kx/unison/issues?q=is%3Aissue+is%3Aopen+label%3Aduplicate)
  - [Invalid](https://github.com/s1kx/unison/issues?q=is%3Aopen+is%3Aissue+label%3Ainvalid)
- - [Question](https://github.com/s1kx/unison/issues?q=is%3Aopen+is%3Aissue+label%3Aquestion)
  - [Won't fix](https://github.com/s1kx/unison/issues?q=is%3Aopen+is%3Aissue+label%3Awontfix)
 
 
