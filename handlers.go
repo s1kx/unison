@@ -51,34 +51,12 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 // Check if a message content string is a valid command by it's prefix "!" or bot mention
 func identifiesAsCommand(content string, ctx *Context) (status bool, updatedContent string) {
 	failure := false
+	success := true
 
-	// Bot mention in a string value
-	botMention := "<@" + ctx.Bot.User.ID + ">"
-
-	// Considtions that must be met and the content afterwards.
-	// as of now this can be switched out with an array that just contains the prefixes
-	// But leave this for now to not optimize something that we might regret
-	//
-	// Optimized version for this function:
-	// prefixes := []string {
-	//	CommandPrefix,
-	//	botMention  // or just: "<@" + ctx.Bot.User.ID + ">"
-	// }
-	//
-	// for prefix := range prefixes {
-	//	if strings.HasPrefix(content, prefix) {
-	//		return (true, removePrefix(content, prefix))
-	//	}
-	// }
-	//
-	referenced := map[bool]string{
-		strings.HasPrefix(content, CommandPrefix): removePrefix(content, CommandPrefix),
-		strings.HasPrefix(content, botMention):    removePrefix(content, botMention),
-	}
-
-	for success, updatedContent := range referenced {
-		if success {
-			return success, updatedContent
+	// For every prefix entry set by botSettings, go through until a match
+	for _, prefix := range ctx.Bot.commandPrefixes {
+		if (strings.HasPrefix(content, prefix)) {
+			return success, removePrefix(content, prefix)
 		}
 	}
 
