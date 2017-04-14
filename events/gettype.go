@@ -3,7 +3,7 @@ package events
 import (
 	"fmt"
 
-	"github.com/s1kx/discordgo"
+	"github.com/bwmarrin/discordgo"
 )
 
 type InvalidEventTypeError struct {
@@ -19,6 +19,10 @@ func GetEventType(v interface{}) (t EventType, err error) {
 	switch v.(type) {
 	default:
 		err = InvalidEventTypeError{Event: v}
+
+	// Websocket events
+	case *discordgo.Event:
+		t = WebsocketEvent
 
 	// Connection events
 	case *discordgo.Connect:

@@ -7,10 +7,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.MessageCreate) {
+func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 	content := strings.TrimSpace(m.Content)
 
-	// start [SwissCheeze] 
+	// start [SwissCheeze]
 	// Check if message is a command and should be handled
 	// Don't communicate with other bots
 	if m.Author.Bot {
@@ -29,7 +29,6 @@ func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.Messa
 	}
 	// end [SwissCheeze]
 
-
 	// Find command, if exists
 	for name, cmd := range ctx.Bot.commandMap {
 		if !strings.HasPrefix(request, name) {
@@ -39,7 +38,7 @@ func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.Messa
 		request = removePrefix(request, name)
 
 		// Invoke command
-		err := cmd.Action(ctx, ds, m.Message, request)
+		err := cmd.Action(ctx, ctx.Discord, m.Message, request)
 		if err != nil {
 			logrus.Errorf("Command [%s]: %s", name, err)
 		}
@@ -69,16 +68,16 @@ func identifiesAsCommand(content string, ctx *Context) (status bool, updatedCont
 	// for prefix := range prefixes {
 	//	if strings.HasPrefix(content, prefix) {
 	//		return (true, removePrefix(content, prefix))
-	//	}		
+	//	}
 	// }
 	//
-	referenced := map[bool]string {
+	referenced := map[bool]string{
 		strings.HasPrefix(content, CommandPrefix): removePrefix(content, CommandPrefix),
-		strings.HasPrefix(content, botMention): removePrefix(content, botMention),
+		strings.HasPrefix(content, botMention):    removePrefix(content, botMention),
 	}
 
 	for success, updatedContent := range referenced {
-		if (success) {
+		if success {
 			return success, updatedContent
 		}
 	}
@@ -91,16 +90,4 @@ func identifiesAsCommand(content string, ctx *Context) (status bool, updatedCont
 func removePrefix(str, remove string) string {
 	result := strings.TrimPrefix(str, remove)
 	return strings.TrimSpace(result)
-}
-
-func handleDiscordEvent(ctx *Context, ds *discordgo.Session, event interface{}) {
-	runEventHooks(ctx, ds, event)
-}
-
-// To run a hook.
-// This needs to be updated to handle multiple different event types... should be somewhat of a generic, but will work for now........
-func runEventHooks(ctx *Context, ds *discordgo.Session, event interface{}) {
-	for _, hook := range ctx.Bot.EventHooks {
-		hook.OnEvent(ctx, ds, event)
-	}
 }

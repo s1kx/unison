@@ -17,7 +17,10 @@ type EventType int
 const (
 	// NoEvent and AllEvents are special constants that don't map to a discord event
 	NoEvent EventType = iota
-	AllEvents
+	//AllEvents // not supported yet
+
+	// Basic Websocket Event
+	WebsocketEvent
 
 	// Discord Events
 	ConnectEvent
