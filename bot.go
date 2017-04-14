@@ -114,7 +114,7 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 	}
 
 	// Make sure at least one prefix exists, let's use "!" as default if none was given.
-	if len(bot.CommandPrefixes) == 0 {
+	if len(bot.CommandPrefixes) == 0 && !settings.CommandInvokedByMention {
 		err := bot.RegisterCommandPrefix(DefaultCommandPrefix) // See command.go
 		if err != nil {
 			return nil, err
