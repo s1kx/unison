@@ -230,11 +230,11 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	// Create context for handlers
 	ctx := NewContext(bot, ds)
 
+	// Invoke event hooks for the hooks that are subscribed to the event type
+	bot.eventDispatcher.Dispatch(ctx, ev)
+
 	// Invoke command handler on new messages
 	if ev.Type == events.MessageCreateEvent {
 		handleMessageCreate(ctx, ev.Event.(*discordgo.MessageCreate))
 	}
-
-	// Invoke event hooks for the hooks that are subscribed to the event type
-	bot.eventDispatcher.Dispatch(ctx, ev)
 }

@@ -38,7 +38,7 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 		request = removePrefix(request, name)
 
 		// Invoke command
-		err := cmd.Action(ctx, ctx.Discord, m.Message, request)
+		err := cmd.Action(ctx, m.Message, request)
 		if err != nil {
 			logrus.Errorf("Command [%s]: %s", name, err)
 		}
@@ -55,7 +55,7 @@ func identifiesAsCommand(content string, ctx *Context) (status bool, updatedCont
 
 	// For every prefix entry set by botSettings, go through until a match
 	for _, prefix := range ctx.Bot.commandPrefixes {
-		if (strings.HasPrefix(content, prefix)) {
+		if strings.HasPrefix(content, prefix) {
 			return success, removePrefix(content, prefix)
 		}
 	}

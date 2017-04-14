@@ -5,7 +5,7 @@ import "github.com/bwmarrin/discordgo"
 const DefaultCommandPrefix = "!"
 
 // CommandActionFunc is the action to execute when a command is called.
-type CommandActionFunc func(ctx *Context, ds *discordgo.Session, m *discordgo.Message, content string) error
+type CommandActionFunc func(ctx *Context, m *discordgo.Message, content string) error
 
 // Command is the interface that every bot command must implement.
 type Command struct {
