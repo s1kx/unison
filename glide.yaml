@@ -1,0 +1,6 @@
+package: github.com/s1kx/unison
+import:
+- package: github.com/bwmarrin/discordgo
+  version: ^v0.15.0
+- package: github.com/Sirupsen/logrus
+  version: ^0.11.5
