@@ -6,6 +6,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/s1kx/unison/events"
 )
 
 // BotSettings contains the definition of bot behavior.
@@ -50,7 +52,8 @@ type Bot struct {
 	// Lookup map for name/alias => command
 	commandMap map[string]*Command
 	// Lookup map for name => hook
-	eventHookMap map[string]*EventHook
+	eventHookMap    map[string]*EventHook
+	eventDispatcher *eventDispatcher
 
 	readyState *discordgo.Ready
 	User       *discordgo.User
@@ -62,8 +65,9 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 		BotSettings: settings,
 		Discord:     ds,
 
-		commandMap:   make(map[string]*Command),
-		eventHookMap: make(map[string]*EventHook),
+		commandMap:      make(map[string]*Command),
+		eventHookMap:    make(map[string]*EventHook),
+		eventDispatcher: newEventDispatcher(),
 	}
 
 	// Register commands
@@ -123,6 +127,12 @@ func (bot *Bot) RegisterEventHook(hook *EventHook) error {
 	}
 	bot.eventHookMap[name] = hook
 
+	if len(hook.Events) == 0 {
+		logrus.Warnf("Hook '%s' is not subscribed to any events", name)
+	}
+
+	bot.eventDispatcher.AddHook(hook)
+
 	return nil
 }
 
@@ -136,17 +146,28 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 		"Username": r.User.Username,
 	}).Infof("Bot is connected and running.")
 
-	// Create context for handlers
-	ctx := NewContext(bot)
-
-	// Add command handler
-	bot.Discord.AddHandler(func(ds *discordgo.Session, m *discordgo.MessageCreate) {
-		handleMessageCreate(ctx, ds, m)
-	})
-
 	// Add generic handler for event hooks
 	// Add command handler
 	bot.Discord.AddHandler(func(ds *discordgo.Session, event interface{}) {
-		handleDiscordEvent(ctx, ds, event)
+		bot.onEvent(ds, event)
 	})
+}
+
+func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
+	// Inspect and wrap event
+	ev, err := events.NewDiscordEvent(dv)
+	if err != nil {
+		logrus.Errorf("event handler: %s", err)
+	}
+
+	// Create context for handlers
+	ctx := NewContext(bot, ds)
+
+	// Invoke command handler on new messages
+	if ev.Type == events.MessageCreateEvent {
+		handleMessageCreate(ctx, ev.Event.(*discordgo.MessageCreate))
+	}
+
+	// Invoke event hooks for the hooks that are subscribed to the event type
+	bot.eventDispatcher.Dispatch(ctx, ev)
 }
