@@ -39,6 +39,14 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 		request = removePrefix(request, name)
 
+		// commands that works on guild related matters should not be runnable from a PM(!)
+		// TODO: write guild requirement check
+
+		// verify that user has permission to invoke this command
+		if !cmd.invokableByUser(m.Author) {
+			break //command was found but permission was denied, so just stop looking for another command
+		}
+
 		// Invoke command
 		err := cmd.Action(ctx, m.Message, request)
 		if err != nil {

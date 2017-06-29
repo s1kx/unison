@@ -26,4 +26,59 @@ type Command struct {
 
 	// Command behavior
 	Action CommandActionFunc
+
+	// Command permissions
+	Permission CommandPermission
+}
+
+// Checks if given user has permission to use this command.
+func (cmd Command) invokableByUser(author *discordgo.User) bool {
+	id := author.ID
+
+	// verify that user hasn't been banned from using command
+	for _, v := range cmd.Permission.BannedUserIDs {
+		if id == v {
+			return false
+		}
+	}
+
+	// check if this user has a unique access
+	for _, v := range cmd.Permission.AllowedUserIDs {
+		if id == v {
+			return true
+		}
+	}
+
+	// if not match is found:
+	return false
+}
+
+// Checks if given user has permission to use this command.
+func (cmd Command) invokableByMember(member *discordgo.Member) bool {
+	// check if user has access
+	if !cmd.invokableByUser(member.User) {
+		return false
+	}
+
+	// check if the user role has access.
+	// Sort every role to speed up this process
+	for _, ur := range member.Roles {
+		for _, ar := range cmd.Permission.AllowedRoles {
+			urc := ur[0]
+			arc := ar[0]
+
+			if urc != arc {
+				continue
+			} else if ur == ar {
+				return true
+			} else if urc < arc {
+				// since the roles are sorted, the first char in ar (accepted roles) should never
+				// be higher than the ur (user roles) first char.
+				break
+			}
+		}
+	}
+
+	// if not match is found:
+	return false
 }
