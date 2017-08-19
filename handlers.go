@@ -26,7 +26,7 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 	// This also removes potential command prefixes just in case
 	legitCommandPrefix, request := identifiesAsCommand(content, ctx)
 	channel, channelErr := ctx.Discord.Channel(m.ChannelID)
-	if channelErr != nil || (!channel.IsPrivate && !legitCommandPrefix) {
+	if channelErr != nil || (channel.Type != 1 && !legitCommandPrefix) {
 		return
 	}
 	// end [SwissCheeze]
