@@ -1,7 +1,5 @@
 package unison
 
-import "github.com/bwmarrin/discordgo"
-
 // CommandActionFunc is the action to execute when a command is called.
 type ServiceActionFunc func(ctx *Context) error
 
