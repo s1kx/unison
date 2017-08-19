@@ -17,6 +17,7 @@ type BotSettings struct {
 
 	Commands   []*Command
 	EventHooks []*EventHook
+	Services   []*Service
 
 	// Every option here is added to an array of accepted prefixes later
 	// So you can set values in CommandPrefix and/or CommandPrefixes at the same time
@@ -59,7 +60,10 @@ type Bot struct {
 	// Lookup map for name/alias => command
 	commandMap map[string]*Command
 	// Lookup map for name => hook
-	eventHookMap    map[string]*EventHook
+	eventHookMap map[string]*EventHook
+	// Lookup map for name => service
+	serviceMap map[string]*Service
+
 	eventDispatcher *eventDispatcher
 
 	// Contains a generated array of accepted prefixes based on BotSettings
@@ -78,6 +82,7 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 
 		commandMap:      make(map[string]*Command),
 		eventHookMap:    make(map[string]*EventHook),
+		serviceMap:      make(map[string]*Serivce),
 		eventDispatcher: newEventDispatcher(),
 
 		commandPrefixes:         []string{},
@@ -95,6 +100,14 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 	// Register event hooks
 	for _, hook := range bot.EventHooks {
 		err := bot.RegisterEventHook(hook)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Register services
+	for _, srv := range bot.Services {
+		err := bot.RegisterService(srv)
 		if err != nil {
 			return nil, err
 		}
@@ -171,6 +184,16 @@ func (bot *Bot) RegisterEventHook(hook *EventHook) error {
 	return nil
 }
 
+func (bot *Bot) RegisterService(srv *Service) error {
+	name := srv.Name
+	if ex, exists := bot.serviceMap[name]; exists {
+		return &DuplicateServiceError{Existing: ex, New: srv, Name: name}
+	}
+	bot.serviceMap[name] = srv
+
+	return nil
+}
+
 func (bot *Bot) RegisterCommandPrefix(prefix string) error {
 	// The prefix must have a length of minimum 1
 	if len(prefix) < 1 {
@@ -211,6 +234,16 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 	if bot.commandInvokedByMention {
 		bot.RegisterCommandPrefix("<@" + bot.User.ID + ">")
 		//TODO[BLOCKER]: What if this fails?
+	}
+
+	// Run services
+	for _, srv := range bot.serviceMap {
+		if srv.Deactivated {
+			continue
+		}
+
+		// run service
+		srv.Action(ctx)
 	}
 
 	// Add generic handler for event hooks

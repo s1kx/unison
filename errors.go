@@ -24,9 +24,20 @@ func (e DuplicateEventHookError) Error() string {
 	return fmt.Sprintf("event hooks: name '%s' already exists", e.Name)
 }
 
+// Duplicate event hook error
+type DuplicateServiceError struct {
+	Existing *Service
+	New      *Service
+	Name     string
+}
+
+func (e DuplicateServiceError) Error() string {
+	return fmt.Sprintf("service: name '%s' already exists", e.Name)
+}
+
 // Duplicate command prefix error
 type DuplicateCommandPrefixError struct {
-	Prefix 	string
+	Prefix string
 }
 
 func (e DuplicateCommandPrefixError) Error() string {
@@ -35,7 +46,7 @@ func (e DuplicateCommandPrefixError) Error() string {
 
 // Too short command prefix error
 type TooShortCommandPrefixError struct {
-	Prefix 	string
+	Prefix string
 }
 
 func (e TooShortCommandPrefixError) Error() string {
