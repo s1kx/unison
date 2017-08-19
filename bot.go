@@ -82,7 +82,7 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 
 		commandMap:      make(map[string]*Command),
 		eventHookMap:    make(map[string]*EventHook),
-		serviceMap:      make(map[string]*Serivce),
+		serviceMap:      make(map[string]*Service),
 		eventDispatcher: newEventDispatcher(),
 
 		commandPrefixes:         []string{},
@@ -235,6 +235,10 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 		bot.RegisterCommandPrefix("<@" + bot.User.ID + ">")
 		//TODO[BLOCKER]: What if this fails?
 	}
+	
+
+	// Create context for services
+	ctx := NewContext(bot, ds)
 
 	// Run services
 	for _, srv := range bot.serviceMap {
