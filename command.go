@@ -32,19 +32,27 @@ type Command struct {
 }
 
 // Checks if given user has permission to use this command.
-func (cmd Command) invokableByUser(author *discordgo.User) bool {
+func (cmd Command) deniedUserAccess(author *discordgo.User) bool {
 	id := author.ID
 
 	// verify that user hasn't been banned from using command
 	for _, v := range cmd.Permission.BannedUserIDs {
-		if id == v {
-			return false
+		if id == v || "*" == v {
+			return true
 		}
 	}
 
+	// if not match is found:
+	return false
+}
+
+// Checks if given user has permission to use this command.
+func (cmd Command) invokableByUser(author *discordgo.User) bool {
+	id := author.ID
+
 	// check if this user has a unique access
 	for _, v := range cmd.Permission.AllowedUserIDs {
-		if id == v ||  "*" == v {
+		if id == v || "*" == v {
 			return true
 		}
 	}
@@ -56,7 +64,7 @@ func (cmd Command) invokableByUser(author *discordgo.User) bool {
 // Checks if given user has permission to use this command.
 func (cmd Command) invokableByMember(member *discordgo.Member) bool {
 	// check if user has access
-	if !cmd.invokableByUser(member.User) {
+	if cmd.deniedUserAccess(member.User) {
 		return false
 	}
 
@@ -69,7 +77,7 @@ func (cmd Command) invokableByMember(member *discordgo.Member) bool {
 
 			if urc != arc {
 				continue
-			} else if ur == ar {
+			} else if urc == arc || "*" == arc {
 				return true
 			} else if urc < arc {
 				// since the roles are sorted, the first char in ar (accepted roles) should never
@@ -77,6 +85,11 @@ func (cmd Command) invokableByMember(member *discordgo.Member) bool {
 				break
 			}
 		}
+	}
+
+	// he might not have the role, but what if he has special permissions
+	if cmd.invokableByUser(member.User) {
+		return true
 	}
 
 	// if not match is found:
