@@ -44,7 +44,7 @@ func (cmd Command) invokableByUser(author *discordgo.User) bool {
 
 	// check if this user has a unique access
 	for _, v := range cmd.Permission.AllowedUserIDs {
-		if id == v {
+		if id == v ||  "*" == v {
 			return true
 		}
 	}
