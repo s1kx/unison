@@ -150,6 +150,18 @@ func (bot *Bot) GetServiceData(srvName string, key string) string {
 	return ""
 }
 
+func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
+	if v, ok := bot.serviceMap[srvName]; ok {
+		if _, s := v.Data[key]; s {
+			bot.serviceMap[srvName].Data[key] = val
+
+			return val
+		}
+	}
+
+	return ""
+}
+
 func (bot *Bot) Run() error {
 	// Add handler to wait for ready state in order to initialize the bot fully.
 	bot.Discord.AddHandler(bot.onReady)
