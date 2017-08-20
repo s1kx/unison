@@ -272,7 +272,7 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 		}
 
 		// run service
-		srv.Action(ctx)
+		go srv.Action(ctx)
 	}
 
 	// Add generic handler for event hooks
