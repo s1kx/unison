@@ -137,6 +137,19 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 	return bot, nil
 }
 
+
+// Get a data value from existing services
+func (bot *Bot) GetServiceData(srvName string, key string) string {
+	if val, ok := bot.serviceMap[srvName]; ok {
+		if d, ok = val[key]; ok {
+			// key exist
+			return d
+		}
+	}
+
+	return ""
+}
+
 func (bot *Bot) Run() error {
 	// Add handler to wait for ready state in order to initialize the bot fully.
 	bot.Discord.AddHandler(bot.onReady)
