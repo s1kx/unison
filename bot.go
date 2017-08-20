@@ -141,7 +141,7 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 // Get a data value from existing services
 func (bot *Bot) GetServiceData(srvName string, key string) string {
 	if val, ok := bot.serviceMap[srvName]; ok {
-		if d, ok = val[key]; ok {
+		if d, ok = val.Data[key]; ok {
 			// key exist
 			return d
 		}
