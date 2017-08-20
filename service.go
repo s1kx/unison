@@ -11,4 +11,6 @@ type Service struct {
 	Deactivated bool
 
 	Action ServiceActionFunc
+	
+	Data map[string]string // store realtime data here
 }
