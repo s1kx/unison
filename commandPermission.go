@@ -14,7 +14,7 @@ type CommandPermission struct {
 	AllowedRoles []string // *discordgo.GuildRole.Role.ID
 }
 
-func NewCommandPermission() *CommandPermission {
+func NewCommandPermission() CommandPermission {
 	cmdP := CommandPermission{}
 
 	cmdP.BannedUserIDs = []string{}
