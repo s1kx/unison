@@ -63,6 +63,7 @@ func (cmd Command) invokableByUser(author *discordgo.User) bool {
 
 // Checks if given user has permission to use this command.
 func (cmd Command) invokableByMember(member *discordgo.Member) bool {
+
 	// check if user has access
 	if cmd.deniedUserAccess(member.User) {
 		return false
@@ -70,6 +71,7 @@ func (cmd Command) invokableByMember(member *discordgo.Member) bool {
 
 	// check if the user role has access.
 	// Sort every role to speed up this process
+	// check the first char
 	for _, ur := range member.Roles {
 		for _, ar := range cmd.Permission.AllowedRoles {
 			urc := ur[0]
@@ -77,7 +79,7 @@ func (cmd Command) invokableByMember(member *discordgo.Member) bool {
 
 			if urc != arc {
 				continue
-			} else if urc == arc || "*" == arc {
+			} else if ur == ar || "*" == ar {
 				return true
 			} else if urc < arc {
 				// since the roles are sorted, the first char in ar (accepted roles) should never
