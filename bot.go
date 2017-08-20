@@ -143,7 +143,7 @@ func (bot *Bot) GetServiceData(srvName string, key string) string {
 	if val, ok := bot.serviceMap[srvName]; ok {
 		if d, ok = val.Data[key]; ok {
 			// key exist
-			return d
+			return val.Data[key]
 		}
 	}
 
