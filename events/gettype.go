@@ -68,9 +68,11 @@ func GetEventType(v interface{}) (t EventType, err error) {
 	case *discordgo.GuildMemberRemove:
 		t = GuildMemberRemoveEvent
 
-	// Guild role events
+	// Guild role events 
 	case *discordgo.GuildRoleCreate:
 		t = GuildRoleCreateEvent
+	case *discordgo.GuildRoleUpdate:
+		t = GuildRoleUpdateEvent
 	case *discordgo.GuildRoleDelete:
 		t = GuildRoleDeleteEvent
 
