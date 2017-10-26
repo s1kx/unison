@@ -2,13 +2,18 @@ package unison
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/s1kx/unison/events"
 )
+
+var termSignal chan os.Signal
 
 // BotSettings contains the definition of bot behavior.
 // It is used for creating the actual bot.
@@ -137,7 +142,6 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 	return bot, nil
 }
 
-
 // Get a data value from existing services
 func (bot *Bot) GetServiceData(srvName string, key string) string {
 	if val, ok := bot.serviceMap[srvName]; ok {
@@ -167,16 +171,28 @@ func (bot *Bot) Run() error {
 	bot.Discord.AddHandler(bot.onReady)
 
 	// Open the websocket and begin listening.
+	fmt.Print("Opening WS connection to Discord .. ")
 	err := bot.Discord.Open()
 	if err != nil {
-		return fmt.Errorf("error opening connection: %s", err)
+		return fmt.Errorf("error: %s", err)
+	}
+	fmt.Println("OK")
+
+	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	termSignal = make(chan os.Signal, 1)
+	signal.Notify(termSignal, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-termSignal
+	fmt.Println("\nShutting down bot..")
+
+	// Cleanly close down the Discord session.
+	fmt.Print("\tClosing WS discord connection .. ")
+	err = bot.Discord.Close()
+	if err != nil {
+		fmt.Println("ERROR")
+		return err
 	}
 
-	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
-
-	// Simple way to keep program running until CTRL-C is pressed.
-	// TODO: Add signal handler to exit gracefully.
-	<-make(chan struct{})
+	fmt.Println("OK")
 
 	return nil
 }
@@ -260,10 +276,9 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 		bot.RegisterCommandPrefix("<@" + bot.User.ID + ">")
 		//TODO[BLOCKER]: What if this fails?
 	}
-	
 
 	// Create context for services
-	ctx := NewContext(bot, ds)
+	ctx := NewContext(bot, ds, termSignal)
 
 	// Run services
 	for _, srv := range bot.serviceMap {
@@ -290,7 +305,7 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	}
 
 	// Create context for handlers
-	ctx := NewContext(bot, ds)
+	ctx := NewContext(bot, ds, termSignal)
 
 	// Invoke event hooks for the hooks that are subscribed to the event type
 	bot.eventDispatcher.Dispatch(ctx, ev)
