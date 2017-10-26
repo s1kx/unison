@@ -16,16 +16,21 @@ type Context struct {
 	SystemInteruptChan chan struct{}
 }
 
+// NewContext Create a new context class for the discord bot
+// This will also hold a signal for system interupts
 func NewContext(bot *Bot, ds *discordgo.Session) *Context {
-	is := make(chan struct{})
+	ctx := new(Context)
+	ctx.Bot = bot
+	ctx.Discord = ds
+	ctx.SystemInteruptChan = make(chan struct{})
 
 	// shutdown signal
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		close(is)
+		close(ctx.SystemInteruptChan)
 	}()
 
-	return &Context{Bot: bot, Discord: ds, SystemInteruptChan: is}
+	return ctx
 }
