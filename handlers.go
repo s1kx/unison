@@ -7,24 +7,29 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.MessageCreate) {
-	content := m.Content
+func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
+	content := strings.TrimSpace(m.Content)
 
+	// start [SwissCheeze]
 	// Check if message is a command and should be handled
-	switch {
 	// Don't communicate with other bots
-	case m.Author.Bot:
-		return
-	// Don't communicate with myself
-	case m.Author.ID == ctx.Bot.User.ID:
-		return
-	// Only handle commands with the right prefix
-	case !strings.HasPrefix(content, CommandPrefix):
+	if m.Author.Bot {
 		return
 	}
 
-	// request is the message without command prefix/bot mention/extra whitespaces.
-	request := cleanUpRequest(content, CommandPrefix)
+	// Don't communicate with myself
+	if m.Author.ID == ctx.Bot.User.ID {
+		return
+	}
+
+	// Only handle commands with the right prefix, when not in a PM channel
+	// This also removes potential command prefixes just in case
+	legitCommandPrefix, request := identifiesAsCommand(content, ctx)
+	channel, channelErr := ctx.Discord.Channel(m.ChannelID)
+	if channelErr != nil || (channel.Type != 1 && !legitCommandPrefix) {
+		return
+	}
+	// end [SwissCheeze]
 
 	// Find command, if exists
 	for name, cmd := range ctx.Bot.commandMap {
@@ -32,10 +37,19 @@ func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.Messa
 			continue
 		}
 
-		request = cleanUpRequest(request, name)
+		request = removePrefix(request, name)
+
+		// commands that works on guild related matters should not be runnable from a PM(!)
+		// TODO: write guild requirement check
+
+		// verify that user has permission to invoke this command
+		member, memberErr := ctx.Discord.GuildMember(channel.GuildID, m.Author.ID)
+		if memberErr != nil || !cmd.invokableByMember(member) {
+			break //command was found but permission was denied, so just stop looking for another command
+		}
 
 		// Invoke command
-		err := cmd.Action(ctx, ds, m.Message, request)
+		err := cmd.Action(ctx, m.Message, request)
 		if err != nil {
 			logrus.Errorf("Command [%s]: %s", name, err)
 		}
@@ -45,20 +59,24 @@ func handleMessageCreate(ctx *Context, ds *discordgo.Session, m *discordgo.Messa
 	}
 }
 
+// Check if a message content string is a valid command by it's prefix "!" or bot mention
+func identifiesAsCommand(content string, ctx *Context) (status bool, updatedContent string) {
+	failure := false
+	success := true
+
+	// For every prefix entry set by botSettings, go through until a match
+	for _, prefix := range ctx.Bot.commandPrefixes {
+		if strings.HasPrefix(content, prefix) {
+			return success, removePrefix(content, prefix)
+		}
+	}
+
+	// None of the conditions were met so this is considered a failure
+	return failure, content
+}
+
 // Removes a substring from the string and cleans up leading & trailing spaces.
-func cleanUpRequest(str, remove string) string {
+func removePrefix(str, remove string) string {
 	result := strings.TrimPrefix(str, remove)
 	return strings.TrimSpace(result)
-}
-
-func handleDiscordEvent(ctx *Context, ds *discordgo.Session, event interface{}) {
-	runEventHooks(ctx, ds, event)
-}
-
-// To run a hook.
-// This needs to be updated to handle multiple different event types... should be somewhat of a generic, but will work for now........
-func runEventHooks(ctx *Context, ds *discordgo.Session, event interface{}) {
-	for _, hook := range ctx.Bot.EventHooks {
-		hook.OnEvent(ctx, ds, event)
-	}
 }
