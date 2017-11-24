@@ -1,20 +1,20 @@
-hash: f0c70a5cae0edf7417d39dd367baf33609489fc0efb318a8e4f947b26a4ab428
-updated: 2017-06-29T19:55:48.987475799+02:00
+hash: 970729c09656fd1891de8d52b82cfd47b7d5e9a4dd0a4f34a6bcf08df13956e7
+updated: 2017-11-24T01:20:33.135682914+01:00
 imports:
 - name: github.com/bwmarrin/discordgo
-  version: 0993a94b4e1c3291bed2047f583f34792269355c
+  version: 9bb722e4fe22296d7d0726e661eddadee2335ba1
 - name: github.com/gorilla/websocket
-  version: ea4d1f681babbce9545c9c5f3d5194a789c89f5b
+  version: 71fa72d4842364bc5f74185f4161e0099ea3624a
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/crypto
-  version: 5ef0053f77724838734b6945dd364d3847e5de1d
+  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
   - nacl/secretbox
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/sys
-  version: 90796e5a05ce440b41c768bd9af257005e470461
+  version: 686000749eaec0b8855b8eef5336cf63899fe51d
   subpackages:
   - unix
 testImports: []
