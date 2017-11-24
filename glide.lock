@@ -1,6 +1,8 @@
-hash: 970729c09656fd1891de8d52b82cfd47b7d5e9a4dd0a4f34a6bcf08df13956e7
-updated: 2017-11-24T01:20:33.135682914+01:00
+hash: a8509ef58fa072c9b119a2474f0d29ad97bf943334f800e9a91a5aeff4301d6c
+updated: 2017-11-24T02:54:16.73467264+01:00
 imports:
+- name: github.com/boltdb/bolt
+  version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
 - name: github.com/bwmarrin/discordgo
   version: 9bb722e4fe22296d7d0726e661eddadee2335ba1
 - name: github.com/gorilla/websocket
