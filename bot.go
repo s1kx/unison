@@ -32,25 +32,26 @@ var termSignal chan os.Signal
 // BotSettings contains the definition of bot behavior.
 // It is used for creating the actual bot.
 type BotSettings struct {
-	Token string
+	Token         string
+	CommandPrefix string
 
 	Commands   []*Command
 	EventHooks []*EventHook
 	Services   []*Service
-
-	// Every option here is added to an array of accepted prefixes later
-	// So you can set values in CommandPrefix and/or CommandPrefixes at the same time
-	// This also regards the option CommandInvokedByMention
-	CommandPrefix           string
-	CommandPrefixes         []string
-	CommandInvokedByMention bool
 }
 
 // Run start the bot. Connect to discord, setup commands, hooks and services.
 func Run(settings *BotSettings) error {
 	// TODO: Validate commands
 
-	// Discord Token
+	// three steps are done before setting up a connection.
+	// 1. Make sure the discord token exists.
+	// 2. Set a prefered way of triggering commands.
+	//		This must be done after establishin a discord socket. See bot.onReady()
+	// 3. Decide the bot state.
+
+	// 1. Make sure the discord token exists.
+	//
 	token := settings.Token
 	// if it was not specified in the Settings struct, check the environment variable
 	if token == "" {
@@ -73,6 +74,15 @@ func Run(settings *BotSettings) error {
 	if err != nil {
 		return err
 	}
+
+	// 2. Please see bot.onReady()
+	//
+
+	// 3. Decide the bot state.
+	//
+	uState := 0
+	// TODO: create a key=value database to handle states.
+	//			 This must be guild related. so each key represents a guild ID and value of its current state.
 
 	// Initialize and start bot
 	bot, err := newBot(settings, ds)
@@ -98,9 +108,8 @@ type Bot struct {
 
 	eventDispatcher *eventDispatcher
 
-	// Contains a generated array of accepted prefixes based on BotSettings
-	commandPrefixes         []string
-	commandInvokedByMention bool
+	// Command prefix
+	commandPrefix string
 
 	readyState *discordgo.Ready
 	User       *discordgo.User
@@ -117,8 +126,7 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 		serviceMap:      make(map[string]*Service),
 		eventDispatcher: newEventDispatcher(),
 
-		commandPrefixes:         []string{},
-		commandInvokedByMention: settings.CommandInvokedByMention,
+		commandPrefix: settings.CommandPrefix,
 	}
 
 	// Register commands
@@ -140,27 +148,6 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 	// Register services
 	for _, srv := range bot.Services {
 		err := bot.RegisterService(srv)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Generate the array of accepted command prefixes.
-	// Use a channel to generate one for bot mentions, or add it later
-	if settings.CommandPrefix != "" {
-		settings.CommandPrefixes = append(settings.CommandPrefixes, settings.CommandPrefix)
-	}
-
-	for _, prefix := range settings.CommandPrefixes {
-		err := bot.RegisterCommandPrefix(prefix)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Make sure at least one prefix exists, let's use "!" as default if none was given.
-	if len(bot.CommandPrefixes) == 0 && !settings.CommandInvokedByMention {
-		err := bot.RegisterCommandPrefix(DefaultCommandPrefix) // See command.go
 		if err != nil {
 			return nil, err
 		}
@@ -263,32 +250,6 @@ func (bot *Bot) RegisterService(srv *Service) error {
 	return nil
 }
 
-func (bot *Bot) RegisterCommandPrefix(prefix string) error {
-	// The prefix must have a length of minimum 1
-	if len(prefix) < 1 {
-		return &TooShortCommandPrefixError{Prefix: prefix}
-	}
-
-	// Dont add one that already exists
-	exists := false
-	for _, existingPrefix := range bot.commandPrefixes {
-		if existingPrefix == prefix {
-			exists = true
-			break
-		}
-	}
-
-	if !exists {
-		// Add the new prefix entry.
-		bot.commandPrefixes = append(bot.commandPrefixes, prefix)
-	} else {
-		// Was not able to add the prefix because it already exists.
-		return &DuplicateCommandPrefixError{Prefix: prefix}
-	}
-
-	return nil
-}
-
 func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 	// Set bot state
 	bot.readyState = r
@@ -299,11 +260,22 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 		"Username": r.User.Username,
 	}).Infof("Bot is connected and running.")
 
-	// Add a command prefix based on the Bot ID if commandInvokedByMention is set to true
-	if bot.commandInvokedByMention {
-		bot.RegisterCommandPrefix("<@" + bot.User.ID + ">")
-		//TODO[BLOCKER]: What if this fails?
+	// 2. Set a prefered way of triggering commands
+	//
+	cprefix := bot.CommandPrefix
+	// if not given, check the environment variable
+	if cprefix == "" {
+		cprefix = os.Getenv(EnvUnisonCommandPrefix)
+
+		// in case this was not set, we trigger by mention
+		if cprefix == "" {
+			cprefix = ds.State.User.Mention()
+		}
+
+		// update Settings
+		bot.CommandPrefix = cprefix
 	}
+	logrus.Info("Commands are triggered by `" + cprefix + "`")
 
 	// Create context for services
 	ctx := NewContext(bot, ds, termSignal)
