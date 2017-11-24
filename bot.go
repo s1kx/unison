@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/andersfylling/unison/state"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/s1kx/unison/events"
@@ -34,6 +35,7 @@ var termSignal chan os.Signal
 type BotSettings struct {
 	Token         string
 	CommandPrefix string
+	BotState      state.Type
 
 	Commands   []*Command
 	EventHooks []*EventHook
@@ -80,7 +82,8 @@ func Run(settings *BotSettings) error {
 
 	// 3. Decide the bot state.
 	//
-	uState := 0
+	uState := settings.BotState
+	// check if valid
 	// TODO: create a key=value database to handle states.
 	//			 This must be guild related. so each key represents a guild ID and value of its current state.
 

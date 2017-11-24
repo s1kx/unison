@@ -61,18 +61,11 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 // Check if a message content string is a valid command by it's prefix "!" or bot mention
 func identifiesAsCommand(content string, ctx *Context) (status bool, updatedContent string) {
-	failure := false
-	success := true
-
-	// For every prefix entry set by botSettings, go through until a match
-	for _, prefix := range ctx.Bot.commandPrefixes {
-		if strings.HasPrefix(content, prefix) {
-			return success, removePrefix(content, prefix)
-		}
+	if strings.HasPrefix(content, ctx.Bot.CommandPrefix) {
+		return true, removePrefix(content, ctx.Bot.CommandPrefix)
 	}
 
-	// None of the conditions were met so this is considered a failure
-	return failure, content
+	return false, content
 }
 
 // Removes a substring from the string and cleans up leading & trailing spaces.

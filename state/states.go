@@ -20,20 +20,19 @@ func IsReserved(state Type) bool {
 
 // Different reserved states
 const (
+	// MissingState is used when no state was specified
+	MissingState Type = iota // 0
 	// Normal is the default bot state
-	Normal Type = iota // 0
+	Normal // 1
 
 	// Pause is used when the bot should not react to events
-	Pause // 1
+	Pause // 2
 
 	// Debug should gives more detailed discord feedback
-	Debug // 2
+	Debug // 3
 
 	// Silence Respond to nothing
-	Silence // 3
-
-	// Reserved4 ..
-	Reserved4
+	Silence // 4
 
 	// Reserved5 ..
 	Reserved5
