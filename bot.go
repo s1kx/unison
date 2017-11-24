@@ -1,6 +1,7 @@
 package unison
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,6 +14,19 @@ import (
 	"github.com/s1kx/unison/events"
 )
 
+// EnvUnisonDiscordToken environment string to collect discord bot token.
+const EnvUnisonDiscordToken = "UNISON_DISCORD_TOKEN"
+
+// EnvUnisonCommandPrefix The command prefix to trigger commands. Defaults to mention. @botname
+const EnvUnisonCommandPrefix = "UNISON_COMMAND_PREFIX"
+
+// EnvUnisonState the default bot state. Defaults to 0. "normal"
+const EnvUnisonState = "UNISON_STATE"
+
+// DiscordGoBotTokenPrefix discordgo requires this token prefix
+const DiscordGoBotTokenPrefix = "Bot "
+
+// used to detect interupt signals and handle graceful shut down
 var termSignal chan os.Signal
 
 // BotSettings contains the definition of bot behavior.
@@ -32,13 +46,26 @@ type BotSettings struct {
 	CommandInvokedByMention bool
 }
 
-func RunBot(settings *BotSettings) error {
+// Run start the bot. Connect to discord, setup commands, hooks and services.
+func Run(settings *BotSettings) error {
 	// TODO: Validate commands
 
-	// discordgo requires "Bot " prefix for Bot applications
+	// Discord Token
 	token := settings.Token
-	if !strings.HasPrefix(token, "Bot ") {
-		token = "Bot " + token
+	// if it was not specified in the Settings struct, check the environment variable
+	if token == "" {
+		token = os.Getenv(EnvUnisonDiscordToken)
+
+		// if the env var was empty as well, crash the bot as this is required.
+		if token == "" {
+			return errors.New("Missing env var " + EnvUnisonDiscordToken + ". This is required. Specify in either Settings struct or env var.")
+		}
+
+		logrus.Info("Using bot token from environment variable.")
+	}
+	// discordgo requires "Bot " prefix for Bot applications
+	if !strings.HasPrefix(token, DiscordGoBotTokenPrefix) {
+		token = DiscordGoBotTokenPrefix + token
 	}
 
 	// Initialize discord client
@@ -142,7 +169,7 @@ func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
 	return bot, nil
 }
 
-// Get a data value from existing services
+// GetServiceData a data value from existing services
 func (bot *Bot) GetServiceData(srvName string, key string) string {
 	if val, ok := bot.serviceMap[srvName]; ok {
 		if d, s := val.Data[key]; s {
@@ -154,6 +181,7 @@ func (bot *Bot) GetServiceData(srvName string, key string) string {
 	return ""
 }
 
+// SetServiceData update or set a new value for a given service key
 func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
 	if v, ok := bot.serviceMap[srvName]; ok {
 		if _, s := v.Data[key]; s {
@@ -166,33 +194,33 @@ func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
 	return ""
 }
 
+// Run Start the bot instance
 func (bot *Bot) Run() error {
 	// Add handler to wait for ready state in order to initialize the bot fully.
 	bot.Discord.AddHandler(bot.onReady)
 
 	// Open the websocket and begin listening.
-	fmt.Print("Opening WS connection to Discord .. ")
+	logrus.Info("Opening WS connection to Discord .. ")
 	err := bot.Discord.Open()
 	if err != nil {
 		return fmt.Errorf("error: %s", err)
 	}
-	fmt.Println("OK")
+	logrus.Info("OK")
 
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
 	termSignal = make(chan os.Signal, 1)
 	signal.Notify(termSignal, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-termSignal
-	fmt.Println("\nShutting down bot..")
+	logrus.Info("\nShutting down bot..")
 
 	// Cleanly close down the Discord session.
-	fmt.Print("\tClosing WS discord connection .. ")
+	logrus.Info("\tClosing WS discord connection .. ")
 	err = bot.Discord.Close()
 	if err != nil {
-		fmt.Println("ERROR")
 		return err
 	}
 
-	fmt.Println("OK")
+	logrus.Info("Shutdown successfully")
 
 	return nil
 }
