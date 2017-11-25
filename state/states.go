@@ -5,7 +5,7 @@ import (
 )
 
 // Type state type
-type Type int8
+type Type uint8
 
 // ToStr convert state.Type into string
 func ToStr(state Type) string {

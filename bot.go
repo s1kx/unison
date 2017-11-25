@@ -146,7 +146,7 @@ type Bot struct {
 	readyState *discordgo.Ready
 	User       *discordgo.User
 
-	state state.Type
+	state state.Type // default bot state
 }
 
 func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
@@ -332,6 +332,16 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	if ev.Type == events.MessageCreateEvent {
 		handleMessageCreate(ctx, ev.Event.(*discordgo.MessageCreate))
 	}
+}
+
+// Bot state
+//
+
+func (bot *Bot) GetState(guildID string) (state.Type, error) {
+	return state.GetGuildState(guildID)
+}
+func (bot *Bot) SetState(guildID string, st state.Type) error {
+	return state.SetGuildState(guildID, st)
 }
 
 // Event listeners
