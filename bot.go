@@ -254,7 +254,8 @@ func (bot *Bot) Run() error {
 	termSignal = make(chan os.Signal, 1)
 	signal.Notify(termSignal, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-termSignal
-	logrus.Info("\nShutting down bot..")
+	fmt.Println("") // keep the `^C` on it's own line for prettiness
+	logrus.Info("Shutting down bot..")
 
 	// Cleanly close down the Discord session.
 	logrus.Info("\tClosing WS discord connection .. ")
@@ -262,6 +263,7 @@ func (bot *Bot) Run() error {
 	if err != nil {
 		return err
 	}
+	logrus.Info("\tClosed WS discord connection.")
 
 	logrus.Info("Shutdown successfully")
 
@@ -351,10 +353,19 @@ func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
 
 	// Add this guild to the database
 	guildID := event.Guild.ID
-	err := state.SetGuildState(guildID, state.DefaultState)
+	st, err := state.GetGuildState(guildID)
 	if err != nil {
-		logrus.Error("Unable to set default state for guild " + event.Guild.Name)
+		// should this be handled? 0.o
+	}
+	if st == state.MissingState {
+
+		err := state.SetGuildState(guildID, state.DefaultState)
+		if err != nil {
+			logrus.Error("Unable to set default state for guild " + event.Guild.Name)
+		} else {
+			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(state.DefaultState) + "`")
+		}
 	} else {
-		logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(state.DefaultState) + "`")
+		logrus.Info("Checked Guild `" + event.Guild.Name + "`, with state `" + state.ToStr(st) + "`")
 	}
 }
