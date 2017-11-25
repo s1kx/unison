@@ -226,6 +226,9 @@ func (bot *Bot) Run() error {
 		bot.onEvent(ds, event)
 	})
 
+	// Handle joining new guilds
+	bot.Discord.AddHandler(onGuildJoin)
+
 	// Open the websocket and begin listening.
 	logrus.Info("Opening WS connection to Discord .. ")
 	err := bot.Discord.Open()
@@ -303,20 +306,6 @@ func (bot *Bot) RegisterService(srv *Service) error {
 	return nil
 }
 
-func (bot *Bot) setState() {}
-func (bot *Bot) getState() {}
-
-func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
-	// Set bot state
-	bot.readyState = r
-	bot.User = r.User
-
-	logrus.WithFields(logrus.Fields{
-		"ID":       r.User.ID,
-		"Username": r.User.Username,
-	}).Infof("Websocket connected.")
-}
-
 func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	// Inspect and wrap event
 	ev, err := events.NewDiscordEvent(dv)
@@ -337,5 +326,35 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	// Invoke command handler on new messages
 	if ev.Type == events.MessageCreateEvent {
 		handleMessageCreate(ctx, ev.Event.(*discordgo.MessageCreate))
+	}
+}
+
+// Event listeners
+//
+
+func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
+	// Set bot state
+	bot.readyState = r
+	bot.User = r.User
+
+	logrus.WithFields(logrus.Fields{
+		"ID":       r.User.ID,
+		"Username": r.User.Username,
+	}).Infof("Websocket connected.")
+}
+
+func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
+
+	if event.Guild.Unavailable {
+		return
+	}
+
+	// Add this guild to the database
+	guildID := event.Guild.ID
+	err := state.SetGuildState(guildID, state.DefaultState)
+	if err != nil {
+		logrus.Error("Unable to set default state for guild " + event.Guild.Name)
+	} else {
+		logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(state.DefaultState) + "`")
 	}
 }
