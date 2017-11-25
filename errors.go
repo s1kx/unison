@@ -2,7 +2,7 @@ package unison
 
 import "fmt"
 
-// Duplicate command error
+// DuplicateCommandError command error
 type DuplicateCommandError struct {
 	Existing *Command
 	New      *Command
@@ -13,7 +13,7 @@ func (e DuplicateCommandError) Error() string {
 	return fmt.Sprintf("commands: name/alias '%s' already exists", e.Name)
 }
 
-// Duplicate event hook error
+// DuplicateEventHookError event hook error
 type DuplicateEventHookError struct {
 	Existing *EventHook
 	New      *EventHook
@@ -24,7 +24,7 @@ func (e DuplicateEventHookError) Error() string {
 	return fmt.Sprintf("event hooks: name '%s' already exists", e.Name)
 }
 
-// Duplicate event hook error
+// DuplicateServiceError service error
 type DuplicateServiceError struct {
 	Existing *Service
 	New      *Service
@@ -35,16 +35,7 @@ func (e DuplicateServiceError) Error() string {
 	return fmt.Sprintf("service: name '%s' already exists", e.Name)
 }
 
-// Duplicate command prefix error
-type DuplicateCommandPrefixError struct {
-	Prefix string
-}
-
-func (e DuplicateCommandPrefixError) Error() string {
-	return fmt.Sprintf("command prefix: '%s' already exists", e.Prefix)
-}
-
-// Too short command prefix error
+// TooShortCommandPrefixError short command prefix error
 type TooShortCommandPrefixError struct {
 	Prefix string
 }

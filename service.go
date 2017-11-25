@@ -1,8 +1,9 @@
 package unison
 
-// CommandActionFunc is the action to execute when a command is called.
+// ServiceActionFunc is the action to execute when a service runs.
 type ServiceActionFunc func(ctx *Context) error
 
+// Service struct used to create new services
 type Service struct {
 	Name string
 
@@ -11,6 +12,6 @@ type Service struct {
 	Deactivated bool
 
 	Action ServiceActionFunc
-	
+
 	Data map[string]string // store realtime data here
 }

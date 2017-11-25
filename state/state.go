@@ -22,6 +22,9 @@ type singleton struct {
 var instance *singleton
 var once sync.Once
 
+// DefaultState bot state for new newly added guilds
+var DefaultState = Normal
+
 // GetDatabaseInstance get a bolt database instance.
 // TODO: defer close?
 func GetDatabaseInstance(file string) (*bolt.DB, error) {

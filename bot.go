@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -83,9 +84,23 @@ func Run(settings *BotSettings) error {
 	// 3. Decide the bot state.
 	//
 	uState := settings.BotState
-	// check if valid
-	// TODO: create a key=value database to handle states.
-	//			 This must be guild related. so each key represents a guild ID and value of its current state.
+	// check if valid state
+	if uState == state.MissingState {
+		// chjeck environment variable
+		uStateStr := os.Getenv(EnvUnisonState)
+
+		if uStateStr == "" {
+			uState = state.Normal // uint8(1)
+		} else {
+			i, e := strconv.ParseInt(uStateStr, 10, 16)
+			if e != nil {
+				return e
+			}
+
+			uState = state.Type(i)
+		}
+	}
+	state.DefaultState = uState
 
 	// Initialize and start bot
 	bot, err := newBot(settings, ds)
@@ -116,6 +131,8 @@ type Bot struct {
 
 	readyState *discordgo.Ready
 	User       *discordgo.User
+
+	state state.Type
 }
 
 func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
@@ -253,6 +270,9 @@ func (bot *Bot) RegisterService(srv *Service) error {
 	return nil
 }
 
+func (bot *Bot) setState() {}
+func (bot *Bot) getState() {}
+
 func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 	// Set bot state
 	bot.readyState = r
@@ -310,8 +330,12 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	// Create context for handlers
 	ctx := NewContext(bot, ds, termSignal)
 
+	// check if event was triggered by bot itself
+	self := false
+	// TODO: check
+
 	// Invoke event hooks for the hooks that are subscribed to the event type
-	bot.eventDispatcher.Dispatch(ctx, ev)
+	bot.eventDispatcher.Dispatch(ctx, ev, self)
 
 	// Invoke command handler on new messages
 	if ev.Type == events.MessageCreateEvent {

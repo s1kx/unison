@@ -2,8 +2,6 @@ package unison
 
 import "github.com/bwmarrin/discordgo"
 
-const DefaultCommandPrefix = "!"
-
 // CommandActionFunc is the action to execute when a command is called.
 type CommandActionFunc func(ctx *Context, m *discordgo.Message, content string) error
 
