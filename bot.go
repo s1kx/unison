@@ -251,7 +251,7 @@ func (bot *Bot) Run() error {
 	}
 
 	// create a add bot url
-	logrus.Info("Add bot using: https://discordapp.com/oauth2/authorize?client_id=%s&scope=bot", bot.Discord.State.User.ID)
+	logrus.Infof("Add bot using: https://discordapp.com/oauth2/authorize?client_id=%s&scope=bot", bot.Discord.State.User.ID)
 
 	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
 	termSignal = make(chan os.Signal, 1)
