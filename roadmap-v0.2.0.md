@@ -26,4 +26,4 @@
 
 7. Thread hooks and commands
 
-  > _Commands and hooks should not be blockers to prevent Unison from handling incoming requests. Should add channels for proper chaining of commands._
+  > _Commands and hooks should not be blockers to prevent Unison from handling incoming requests. Should add channels for proper chaining of commands. ... Or thread the action that runs all the commands in que. Then no channels are needed, and everything should be able to run in desired sequence without blocking any new incoming requests._

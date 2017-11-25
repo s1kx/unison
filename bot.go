@@ -78,8 +78,22 @@ func Run(settings *BotSettings) error {
 		return err
 	}
 
-	// 2. Please see bot.onReady()
+	// 2. Set a prefered way of triggering commands
 	//
+	cprefix := settings.CommandPrefix
+	// if not given, check the environment variable
+	if cprefix == "" {
+		cprefix = os.Getenv(EnvUnisonCommandPrefix)
+
+		// in case this was not set, we trigger by mention
+		if cprefix == "" {
+			cprefix = ds.State.User.Mention()
+		}
+
+		// update Settings
+		settings.CommandPrefix = cprefix
+	}
+	logrus.Info("Commands are triggered by `" + cprefix + "`")
 
 	// 3. Decide the bot state.
 	//
@@ -206,6 +220,12 @@ func (bot *Bot) Run() error {
 	// Add handler to wait for ready state in order to initialize the bot fully.
 	bot.Discord.AddHandler(bot.onReady)
 
+	// Add generic handler for event hooks
+	// Add command handler
+	bot.Discord.AddHandler(func(ds *discordgo.Session, event interface{}) {
+		bot.onEvent(ds, event)
+	})
+
 	// Open the websocket and begin listening.
 	logrus.Info("Opening WS connection to Discord .. ")
 	err := bot.Discord.Open()
@@ -213,6 +233,19 @@ func (bot *Bot) Run() error {
 		return fmt.Errorf("error: %s", err)
 	}
 	logrus.Info("OK")
+
+	// Create context for services
+	ctx := NewContext(bot, bot.Discord, termSignal)
+
+	// Run services
+	for _, srv := range bot.serviceMap {
+		if srv.Deactivated {
+			continue
+		}
+
+		// run service
+		go srv.Action(ctx)
+	}
 
 	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
 	termSignal = make(chan os.Signal, 1)
@@ -281,43 +314,7 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 	logrus.WithFields(logrus.Fields{
 		"ID":       r.User.ID,
 		"Username": r.User.Username,
-	}).Infof("Bot is connected and running.")
-
-	// 2. Set a prefered way of triggering commands
-	//
-	cprefix := bot.CommandPrefix
-	// if not given, check the environment variable
-	if cprefix == "" {
-		cprefix = os.Getenv(EnvUnisonCommandPrefix)
-
-		// in case this was not set, we trigger by mention
-		if cprefix == "" {
-			cprefix = ds.State.User.Mention()
-		}
-
-		// update Settings
-		bot.CommandPrefix = cprefix
-	}
-	logrus.Info("Commands are triggered by `" + cprefix + "`")
-
-	// Create context for services
-	ctx := NewContext(bot, ds, termSignal)
-
-	// Run services
-	for _, srv := range bot.serviceMap {
-		if srv.Deactivated {
-			continue
-		}
-
-		// run service
-		go srv.Action(ctx)
-	}
-
-	// Add generic handler for event hooks
-	// Add command handler
-	bot.Discord.AddHandler(func(ds *discordgo.Session, event interface{}) {
-		bot.onEvent(ds, event)
-	})
+	}).Infof("Websocket connected.")
 }
 
 func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
