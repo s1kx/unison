@@ -8,9 +8,10 @@ import (
 
 // EventHandlerFunc handles a discord event and returns whether it handles the
 // event type and if an error occured.
-type EventHandlerFunc func(ctx *Context, ev *events.DiscordEvent) (handled bool, err error)
+// self is true if event was fired by bot. eg bot sent a message to someone.
+type EventHandlerFunc func(ctx *Context, ev *events.DiscordEvent, self bool) (handled bool, err error)
 
-// Hook interface for anything that is supposed to react on a event, besides commands.
+// EventHook interface for anything that is supposed to react on a event, besides commands.
 type EventHook struct {
 	// Name of the hook
 	Name string
@@ -81,7 +82,7 @@ func (d *eventDispatcher) AddHook(hook *EventHook) error {
 	return nil
 }
 
-func (d *eventDispatcher) Dispatch(ctx *Context, event *events.DiscordEvent) error {
+func (d *eventDispatcher) Dispatch(ctx *Context, event *events.DiscordEvent, self bool) error {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
@@ -94,7 +95,7 @@ func (d *eventDispatcher) Dispatch(ctx *Context, event *events.DiscordEvent) err
 
 	for _, hook := range hooks {
 		// TODO: Run event handler in goroutine
-		hook.OnEvent(ctx, event)
+		hook.OnEvent(ctx, event, self)
 	}
 
 	return nil

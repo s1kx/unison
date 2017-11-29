@@ -2,7 +2,7 @@ package unison
 
 // import "github.com/bwmarrin/discordgo"
 
-// Designed to handle X guilds per bot instance
+// CommandPermission Designed to handle X guilds per bot instance
 type CommandPermission struct {
 	// Used for specific User banning on a per command basis
 	BannedUserIDs []string // *discordgo.User.ID
@@ -14,6 +14,7 @@ type CommandPermission struct {
 	AllowedRoles []string // *discordgo.GuildRole.Role.ID
 }
 
+// NewCommandPermission creates a new default filled command permission struct
 func NewCommandPermission() CommandPermission {
 	cmdP := CommandPermission{}
 

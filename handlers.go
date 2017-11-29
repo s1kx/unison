@@ -24,7 +24,7 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 	// Only handle commands with the right prefix, when not in a PM channel
 	// This also removes potential command prefixes just in case
-	legitCommandPrefix, request := identifiesAsCommand(content, ctx)
+	legitCommandPrefix, request := identifiesAsCommand(content, ctx.Bot.CommandPrefix)
 	channel, channelErr := ctx.Discord.Channel(m.ChannelID)
 	if channelErr != nil || (channel.Type != 1 && !legitCommandPrefix) {
 		return
@@ -60,23 +60,35 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 }
 
 // Check if a message content string is a valid command by it's prefix "!" or bot mention
-func identifiesAsCommand(content string, ctx *Context) (status bool, updatedContent string) {
-	failure := false
-	success := true
-
-	// For every prefix entry set by botSettings, go through until a match
-	for _, prefix := range ctx.Bot.commandPrefixes {
-		if strings.HasPrefix(content, prefix) {
-			return success, removePrefix(content, prefix)
+func identifiesAsCommand(content, prefix string) (status bool, updatedContent string) {
+	if strings.HasPrefix(content, prefix) {
+		// remove duplicate command prefixes
+		result := removePrefix(content, prefix)
+		for {
+			if !strings.HasPrefix(result, prefix) {
+				break
+			} else {
+				result = removePrefix(result, prefix)
+			}
 		}
+
+		// make sure there is content after removing the command prefix
+		if len(result) > 0 {
+			return true, result
+		}
+		return false, result
 	}
 
-	// None of the conditions were met so this is considered a failure
-	return failure, content
+	return false, content
 }
 
 // Removes a substring from the string and cleans up leading & trailing spaces.
 func removePrefix(str, remove string) string {
 	result := strings.TrimPrefix(str, remove)
-	return strings.TrimSpace(result)
+	result = strings.TrimSpace(result)
+
+	if str[0] == ' ' {
+		return result[1:len(result)]
+	}
+	return result
 }
