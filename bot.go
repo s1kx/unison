@@ -241,7 +241,7 @@ func (bot *Bot) Run() error {
 	
 	// check how the bot is triggered. if it's "", we set it by mention
 	if bot.commandPrefix == "" {
-		bot.commandPrefix = ds.State.User.Mention()
+		bot.commandPrefix = bot.Discord.State.User.Mention()
 		bot.BotSettings.CommandPrefix = bot.commandPrefix
 	}
 
