@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/andersfylling/unison/state"
+	"github.com/s1kx/unison/state"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/s1kx/unison/events"
