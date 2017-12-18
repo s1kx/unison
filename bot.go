@@ -87,7 +87,9 @@ func Run(settings *BotSettings) error {
 
 		// in case this was not set, we trigger by mention
 		if cprefix == "" {
-			cprefix = ds.State.User.Mention()
+			// This must be set after web socket connection has been opened
+			// as the username of the bot is still unknown at this stage.
+			// cprefix = ds.State.User.Mention()
 		}
 
 		// update Settings
@@ -236,6 +238,12 @@ func (bot *Bot) Run() error {
 		return fmt.Errorf("error: %s", err)
 	}
 	logrus.Info("OK")
+	
+	// check how the bot is triggered. if it's "", we set it by mention
+	if bot.commandPrefix == "" {
+		bot.commandPrefix = ds.State.User.Mention()
+		bot.BotSettings.CommandPrefix = bot.commandPrefix
+	}
 
 	// Create context for services
 	ctx := NewContext(bot, bot.Discord, termSignal)
