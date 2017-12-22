@@ -8,6 +8,7 @@ import (
 )
 
 func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
+	var err error
 	content := strings.TrimSpace(m.Content)
 
 	// start [SwissCheeze]
@@ -25,8 +26,8 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 	// Only handle commands with the right prefix, when not in a PM channel
 	// This also removes potential command prefixes just in case
 	legitCommandPrefix, request := identifiesAsCommand(content, ctx.Bot.CommandPrefix)
-	channel, channelErr := ctx.Discord.Channel(m.ChannelID)
-	if channelErr != nil || (channel.Type != 1 && !legitCommandPrefix) {
+	channel, err := ctx.Discord.Channel(m.ChannelID)
+	if err != nil || (channel.Type != 1 && !legitCommandPrefix) {
 		return
 	}
 	// end [SwissCheeze]
@@ -37,19 +38,21 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 			continue
 		}
 
-		request = removePrefix(request, name)
+		// remove the command prefix
+		//request = removePrefix(request, name) // depratecated after subcommands was added
+		// TODO: call func recursively for sub commands
 
 		// commands that works on guild related matters should not be runnable from a PM(!)
 		// TODO: write guild requirement check
 
 		// verify that user has permission to invoke this command
-		member, memberErr := ctx.Discord.GuildMember(channel.GuildID, m.Author.ID)
-		if memberErr != nil || !cmd.invokableByMember(member) {
+		memberPermissions, err := ctx.Bot.Discord.UserChannelPermissions(m.Author.ID, m.ChannelID)
+		if err != nil || !cmd.invokableWithPermissions(uint32(memberPermissions)) {
 			break //command was found but permission was denied, so just stop looking for another command
 		}
 
 		// Invoke command
-		err := cmd.Action(ctx, m.Message, request)
+		err = cmd.Action(ctx, m.Message, request)
 		if err != nil {
 			logrus.Errorf("Command [%s]: %s", name, err)
 		}

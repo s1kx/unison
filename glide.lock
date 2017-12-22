@@ -1,22 +1,28 @@
-hash: a8509ef58fa072c9b119a2474f0d29ad97bf943334f800e9a91a5aeff4301d6c
-updated: 2017-11-24T02:54:16.73467264+01:00
+hash: dbb087a0e13991c2b5f0c884e9e3dd28c072e32e574d1129bb3802140001cad1
+updated: 2017-12-22T15:52:36.316442627+01:00
 imports:
+- name: github.com/alexflint/go-arg
+  version: 59fccacb2679dde66e0b20ed65bd26178fcbf54e
 - name: github.com/boltdb/bolt
   version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
 - name: github.com/bwmarrin/discordgo
-  version: 9bb722e4fe22296d7d0726e661eddadee2335ba1
+  version: e024d5f0323de5478479d7568c87d69763f4537b
 - name: github.com/gorilla/websocket
-  version: 71fa72d4842364bc5f74185f4161e0099ea3624a
+  version: cdedf21e585dae942951e34d6defc3215b4280fa
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/urfave/cli
+  version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
 - name: golang.org/x/crypto
-  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
+  version: d585fd2cc9195196078f516b69daff6744ef5e84
   subpackages:
   - nacl/secretbox
   - poly1305
   - salsa20/salsa
 - name: golang.org/x/sys
-  version: 686000749eaec0b8855b8eef5336cf63899fe51d
+  version: 83801418e1b59fb1880e363299581ee543af32ca
   subpackages:
   - unix
+- name: gopkg.in/urfave/cli.v2
+  version: b2bf3c5abeb90da407891aecd1df2c5a1f6170c1
 testImports: []

@@ -3,7 +3,7 @@ package unison
 import (
 	"sync"
 
-	"github.com/s1kx/unison/events"
+	"github.com/andersfylling/unison/events"
 )
 
 // EventHandlerFunc handles a discord event and returns whether it handles the

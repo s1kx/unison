@@ -10,10 +10,10 @@ import (
 	"syscall"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/s1kx/unison/state"
+	"github.com/andersfylling/unison/state"
 	"github.com/bwmarrin/discordgo"
 
-	"github.com/s1kx/unison/events"
+	"github.com/andersfylling/unison/events"
 )
 
 // EnvUnisonDiscordToken environment string to collect discord bot token.
@@ -238,7 +238,7 @@ func (bot *Bot) Run() error {
 		return fmt.Errorf("error: %s", err)
 	}
 	logrus.Info("OK")
-	
+
 	// check how the bot is triggered. if it's "", we set it by mention
 	if bot.commandPrefix == "" {
 		bot.commandPrefix = bot.Discord.State.User.Mention()
