@@ -10,23 +10,12 @@ import (
 	"syscall"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/andersfylling/unison/constant"
 	"github.com/andersfylling/unison/state"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/andersfylling/unison/events"
 )
-
-// EnvUnisonDiscordToken environment string to collect discord bot token.
-const EnvUnisonDiscordToken = "UNISON_DISCORD_TOKEN"
-
-// EnvUnisonCommandPrefix The command prefix to trigger commands. Defaults to mention. @botname
-const EnvUnisonCommandPrefix = "UNISON_COMMAND_PREFIX"
-
-// EnvUnisonState the default bot state. Defaults to 0. "normal"
-const EnvUnisonState = "UNISON_STATE"
-
-// DiscordGoBotTokenPrefix discordgo requires this token prefix
-const DiscordGoBotTokenPrefix = "Bot "
 
 // used to detect interupt signals and handle graceful shut down
 var termSignal chan os.Signal
@@ -58,18 +47,18 @@ func Run(settings *BotSettings) error {
 	token := settings.Token
 	// if it was not specified in the Settings struct, check the environment variable
 	if token == "" {
-		token = os.Getenv(EnvUnisonDiscordToken)
+		token = os.Getenv(constant.EnvUnisonDiscordToken)
 
 		// if the env var was empty as well, crash the bot as this is required.
 		if token == "" {
-			return errors.New("Missing env var " + EnvUnisonDiscordToken + ". This is required. Specify in either Settings struct or env var.")
+			return errors.New("Missing env var " + constant.EnvUnisonDiscordToken + ". This is required. Specify in either Settings struct or env var.")
 		}
 
 		logrus.Info("Using bot token from environment variable.")
 	}
 	// discordgo requires "Bot " prefix for Bot applications
-	if !strings.HasPrefix(token, DiscordGoBotTokenPrefix) {
-		token = DiscordGoBotTokenPrefix + token
+	if !strings.HasPrefix(token, constant.DiscordGoBotTokenPrefix) {
+		token = constant.DiscordGoBotTokenPrefix + token
 	}
 
 	// Initialize discord client
@@ -83,7 +72,7 @@ func Run(settings *BotSettings) error {
 	cprefix := settings.CommandPrefix
 	// if not given, check the environment variable
 	if cprefix == "" {
-		cprefix = os.Getenv(EnvUnisonCommandPrefix)
+		cprefix = os.Getenv(constant.EnvUnisonCommandPrefix)
 
 		// in case this was not set, we trigger by mention
 		if cprefix == "" {
@@ -103,7 +92,7 @@ func Run(settings *BotSettings) error {
 	// check if valid state
 	if uState == state.MissingState {
 		// chjeck environment variable
-		uStateStr := os.Getenv(EnvUnisonState)
+		uStateStr := os.Getenv(constant.EnvUnisonState)
 
 		if uStateStr == "" {
 			uState = state.Normal // uint8(1)
@@ -286,7 +275,8 @@ func (bot *Bot) RegisterCommand(cmd *Command) error {
 	if ex, exists := bot.commandMap[name]; exists {
 		return &DuplicateCommandError{Existing: ex, New: cmd, Name: name}
 	}
-	bot.commandMap[name] = cmd
+
+	bot.commandMap[name] = cmd.buildCommand()
 
 	// TODO: Register aliases
 

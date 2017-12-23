@@ -6,13 +6,14 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	arg "github.com/alexflint/go-arg"
+	"github.com/andersfylling/unison/constant"
 	"github.com/bwmarrin/discordgo"
 )
 
-const SubCommandDepth = 1
-
+// CommandAction command logic to be executed
 type CommandAction func(ctx *Context, msg *discordgo.Message, request string) error
 
+// Command struct holds all the command details
 type Command struct {
 	// Name is the command title used to trigger the CommandAction
 	Name string
@@ -57,7 +58,13 @@ func (cmd *Command) buildCommand() *Command {
 	errArr = append(errArr, cmd.createParser(cmd.Flags))
 
 	// make sure the depth of sub commands is acceptable
-	errArr = append(errArr, cmd.insistSubCommandDepth(SubCommandDepth))
+	errArr = append(errArr, cmd.insistSubCommandDepth(constant.SubCommandDepthLimit))
+
+	// Not sure if this matters, but make sure the User can write in the same channel that the bot
+	// gets triggered from. Some one that cannot send a message should never be able to trigger a command.
+	if cmd.Permissions == 0 {
+		cmd.Permissions = 0x00000800
+	}
 
 	// check for issues
 	for _, err := range errArr {
@@ -86,7 +93,7 @@ func (cmd *Command) createParser(dests ...interface{}) error {
 func (cmd *Command) insistSubCommandDepth(depth int) error {
 
 	if depth <= 0 && len(cmd.SubCommands) > 0 {
-		errMsg := fmt.Sprintf("Too many recursive sub commands. Max depth is %d", SubCommandDepth)
+		errMsg := fmt.Sprintf("Too many recursive sub commands. Max depth is %d", constant.SubCommandDepthLimit)
 		return errors.New(errMsg)
 	}
 
