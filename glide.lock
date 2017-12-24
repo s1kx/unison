@@ -1,14 +1,18 @@
-hash: dbb087a0e13991c2b5f0c884e9e3dd28c072e32e574d1129bb3802140001cad1
-updated: 2017-12-22T15:52:36.316442627+01:00
+hash: d03e7a05b593bd5d48a71d956d1af8935deec4a1ed95525189e670abe87627a5
+updated: 2017-12-24T23:41:27.025947029+01:00
 imports:
 - name: github.com/alexflint/go-arg
   version: 59fccacb2679dde66e0b20ed65bd26178fcbf54e
+- name: github.com/alexflint/go-scalar
+  version: 45e5d6cd8605faef82fda2bacc59e734a0b6f1f0
 - name: github.com/boltdb/bolt
   version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
 - name: github.com/bwmarrin/discordgo
-  version: e024d5f0323de5478479d7568c87d69763f4537b
+  version: e6ed3d579b4a6d5e972f83583ff512813d07020d
 - name: github.com/gorilla/websocket
   version: cdedf21e585dae942951e34d6defc3215b4280fa
+- name: github.com/kballard/go-shellquote
+  version: cd60e84ee657ff3dc51de0b4f55dd299a3e136f2
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/urfave/cli
@@ -23,6 +27,4 @@ imports:
   version: 83801418e1b59fb1880e363299581ee543af32ca
   subpackages:
   - unix
-- name: gopkg.in/urfave/cli.v2
-  version: b2bf3c5abeb90da407891aecd1df2c5a1f6170c1
 testImports: []

@@ -9,3 +9,4 @@ import:
 - package: github.com/urfave/cli
   version: ^1.20.0
 - package: github.com/alexflint/go-arg
+- package: github.com/kballard/go-shellquote

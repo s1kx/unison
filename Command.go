@@ -3,11 +3,13 @@ package unison
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/Sirupsen/logrus"
 	arg "github.com/alexflint/go-arg"
 	"github.com/andersfylling/unison/constant"
 	"github.com/bwmarrin/discordgo"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
 // CommandAction command logic to be executed
@@ -45,7 +47,7 @@ type Command struct {
 	//
 
 	// go-arg parser for user input
-	flagParser *arg.Parser
+	flagParser *arg.Parser // might be nil
 }
 
 // buildCommand configurates the command from the public fields before it gets stored.
@@ -55,7 +57,9 @@ func (cmd *Command) buildCommand() *Command {
 	// Build the command in layers..
 
 	// Build a go-arg.Parser to handle the flags
-	errArr = append(errArr, cmd.createParser(cmd.Flags))
+	if cmd.Flags != nil {
+		errArr = append(errArr, cmd.createParser(cmd.Flags))
+	}
 
 	// make sure the depth of sub commands is acceptable
 	errArr = append(errArr, cmd.insistSubCommandDepth(constant.SubCommandDepthLimit))
@@ -79,9 +83,11 @@ func (cmd *Command) buildCommand() *Command {
 
 // createParser creates a go-arg parser that can be used to parse user input for flags/optionals
 func (cmd *Command) createParser(dests ...interface{}) error {
-	p, err := arg.NewParser(arg.Config{}, dests)
+	p, err := arg.NewParser(arg.Config{}, dests...)
 	if err != nil {
-		return err
+		//return err
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	cmd.flagParser = p
@@ -110,4 +116,19 @@ func (cmd *Command) insistSubCommandDepth(depth int) error {
 // invokableWithPermissions checks if the permissions given has the minimum access level
 func (cmd *Command) invokableWithPermissions(permissions uint32) bool {
 	return (cmd.Permissions & permissions) == permissions
+}
+
+func (cmd *Command) parseInput(input string) error {
+	if cmd.Flags == nil {
+		return errors.New("No flags have been added")
+	}
+
+	args, err := shellquote.Split(input)
+	if err != nil {
+		return err
+	}
+
+	cmd.flagParser.Parse(args)
+
+	return nil
 }
