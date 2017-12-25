@@ -12,8 +12,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+var logFormatter = logrus.TextFormatter{
+	FullTimestamp:   true,
+	TimestampFormat: "2006-01-02 15:04:05",
+}
+
 // Run start the bot. Connect to discord, setup commands, hooks and services.
 func Run(settings *Config) error {
+	// Configure logger format.
+	logrus.SetFormatter(&logFormatter)
+
 	// TODO: Validate commands
 
 	// three steps are done before setting up a connection.
