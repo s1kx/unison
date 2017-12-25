@@ -3,7 +3,6 @@ package unison
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/Sirupsen/logrus"
 	arg "github.com/alexflint/go-arg"
@@ -85,9 +84,7 @@ func (cmd *Command) buildCommand() *Command {
 func (cmd *Command) createParser(dests ...interface{}) error {
 	p, err := arg.NewParser(arg.Config{}, dests...)
 	if err != nil {
-		//return err
-		fmt.Println(err)
-		os.Exit(-1)
+		return err
 	}
 
 	cmd.flagParser = p
@@ -128,7 +125,5 @@ func (cmd *Command) parseInput(input string) error {
 		return err
 	}
 
-	cmd.flagParser.Parse(args)
-
-	return nil
+	return cmd.flagParser.Parse(args)
 }

@@ -19,7 +19,9 @@ const (
 	// package state
 	//
 
+	// StateKey database key identifier for key/value database
 	StateKey = "state"
 
+	// DefaultDatabaseFile file name for key/value database
 	DefaultDatabaseFile = "unisonStates.db"
 )

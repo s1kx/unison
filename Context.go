@@ -6,6 +6,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// used to detect interupt signals and handle graceful shut down
+var termSignal chan os.Signal
+
 // Context is a type that is passed to every handler
 // in a bot application.
 // It can be used to refer back to main components.

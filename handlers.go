@@ -25,7 +25,15 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 	// Only handle commands with the right prefix, when not in a PM channel
 	// This also removes potential command prefixes just in case
-	legitCommandPrefix, request := identifiesAsCommand(content, ctx.Bot.CommandPrefix)
+	var legitCommandPrefix bool
+	var request string
+	for _, prefix := range ctx.Bot.CommandPrefix {
+		legitCommandPrefix, request = identifiesAsCommand(content, prefix)
+
+		if legitCommandPrefix {
+			break
+		}
+	}
 	channel, err := ctx.Discord.Channel(m.ChannelID)
 	if err != nil || (channel.Type != 1 && !legitCommandPrefix) {
 		return

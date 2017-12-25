@@ -1,125 +1,21 @@
 package unison
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
 	"syscall"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/andersfylling/unison/constant"
 	"github.com/andersfylling/unison/state"
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/andersfylling/unison/events"
 )
 
-// used to detect interupt signals and handle graceful shut down
-var termSignal chan os.Signal
-
-// BotSettings contains the definition of bot behavior.
-// It is used for creating the actual bot.
-type BotSettings struct {
-	Token         string
-	CommandPrefix string
-	BotState      state.Type
-
-	Commands   []*Command
-	EventHooks []*EventHook
-	Services   []*Service
-}
-
-// Run start the bot. Connect to discord, setup commands, hooks and services.
-func Run(settings *BotSettings) error {
-	// TODO: Validate commands
-
-	// three steps are done before setting up a connection.
-	// 1. Make sure the discord token exists.
-	// 2. Set a prefered way of triggering commands.
-	//		This must be done after establishin a discord socket. See bot.onReady()
-	// 3. Decide the bot state.
-
-	// 1. Make sure the discord token exists.
-	//
-	token := settings.Token
-	// if it was not specified in the Settings struct, check the environment variable
-	if token == "" {
-		token = os.Getenv(constant.EnvUnisonDiscordToken)
-
-		// if the env var was empty as well, crash the bot as this is required.
-		if token == "" {
-			return errors.New("Missing env var " + constant.EnvUnisonDiscordToken + ". This is required. Specify in either Settings struct or env var.")
-		}
-
-		logrus.Info("Using bot token from environment variable.")
-	}
-	// discordgo requires "Bot " prefix for Bot applications
-	if !strings.HasPrefix(token, constant.DiscordGoBotTokenPrefix) {
-		token = constant.DiscordGoBotTokenPrefix + token
-	}
-
-	// Initialize discord client
-	ds, err := discordgo.New(token)
-	if err != nil {
-		return err
-	}
-
-	// 2. Set a prefered way of triggering commands
-	//
-	cprefix := settings.CommandPrefix
-	// if not given, check the environment variable
-	if cprefix == "" {
-		cprefix = os.Getenv(constant.EnvUnisonCommandPrefix)
-
-		// in case this was not set, we trigger by mention
-		if cprefix == "" {
-			// This must be set after web socket connection has been opened
-			// as the username of the bot is still unknown at this stage.
-			// cprefix = ds.State.User.Mention()
-		}
-
-		// update Settings
-		settings.CommandPrefix = cprefix
-	}
-	logrus.Info("Commands are triggered by `" + cprefix + "`")
-
-	// 3. Decide the bot state.
-	//
-	uState := settings.BotState
-	// check if valid state
-	if uState == state.MissingState {
-		// chjeck environment variable
-		uStateStr := os.Getenv(constant.EnvUnisonState)
-
-		if uStateStr == "" {
-			uState = state.Normal // uint8(1)
-		} else {
-			i, e := strconv.ParseInt(uStateStr, 10, 16)
-			if e != nil {
-				return e
-			}
-
-			uState = state.Type(i)
-		}
-	}
-	state.DefaultState = uState
-
-	// Initialize and start bot
-	bot, err := newBot(settings, ds)
-	if err != nil {
-		return err
-	}
-	bot.Run()
-
-	return nil
-}
-
 // Bot is an active bot session.
 type Bot struct {
-	*BotSettings
+	*Config
 	Discord *discordgo.Session
 
 	// Lookup map for name/alias => command
@@ -131,8 +27,8 @@ type Bot struct {
 
 	eventDispatcher *eventDispatcher
 
-	// Command prefix
-	commandPrefix string
+	// Command prefixes
+	commandPrefix []string
 
 	readyState *discordgo.Ready
 	User       *discordgo.User
@@ -140,18 +36,25 @@ type Bot struct {
 	state state.Type // default bot state
 }
 
-func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
+func newBot(config *Config, ds *discordgo.Session) (*Bot, error) {
+	commandPrefixes := []string{}
+
+	// add desired prefixes
+	for _, prefix := range config.CommandPrefix {
+		commandPrefixes = append(commandPrefixes, prefix)
+	}
+
 	// Initialize bot
 	bot := &Bot{
-		BotSettings: settings,
-		Discord:     ds,
+		Config:  config,
+		Discord: ds,
 
 		commandMap:      make(map[string]*Command),
 		eventHookMap:    make(map[string]*EventHook),
 		serviceMap:      make(map[string]*Service),
 		eventDispatcher: newEventDispatcher(),
 
-		commandPrefix: settings.CommandPrefix,
+		commandPrefix: commandPrefixes,
 	}
 
 	// Register commands
@@ -228,10 +131,10 @@ func (bot *Bot) Run() error {
 	}
 	logrus.Info("OK")
 
-	// check how the bot is triggered. if it's "", we set it by mention
-	if bot.commandPrefix == "" {
-		bot.commandPrefix = bot.Discord.State.User.Mention()
-		bot.BotSettings.CommandPrefix = bot.commandPrefix
+	// add trigger by mention unless disabled in config
+	if !bot.Config.DisableMentionTrigger {
+		bot.commandPrefix = append(bot.commandPrefix, bot.Discord.State.User.Mention())
+		bot.Config.CommandPrefix = bot.commandPrefix
 	}
 
 	// Create context for services
@@ -270,6 +173,7 @@ func (bot *Bot) Run() error {
 	return nil
 }
 
+// RegisterCommand ...
 func (bot *Bot) RegisterCommand(cmd *Command) error {
 	name := cmd.Name
 	if ex, exists := bot.commandMap[name]; exists {
@@ -283,6 +187,7 @@ func (bot *Bot) RegisterCommand(cmd *Command) error {
 	return nil
 }
 
+// RegisterEventHook ...
 func (bot *Bot) RegisterEventHook(hook *EventHook) error {
 	name := hook.Name
 	if ex, exists := bot.eventHookMap[name]; exists {
@@ -299,6 +204,7 @@ func (bot *Bot) RegisterEventHook(hook *EventHook) error {
 	return nil
 }
 
+// RegisterService ...
 func (bot *Bot) RegisterService(srv *Service) error {
 	name := srv.Name
 	if ex, exists := bot.serviceMap[name]; exists {
@@ -335,9 +241,12 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 // Bot state
 //
 
+// GetState retrieves the state for given guild
 func (bot *Bot) GetState(guildID string) (state.Type, error) {
 	return state.GetGuildState(guildID)
 }
+
+// SetState updates state for given guild
 func (bot *Bot) SetState(guildID string, st state.Type) error {
 	return state.SetGuildState(guildID, st)
 }
