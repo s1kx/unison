@@ -3,6 +3,7 @@ package unison
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/Sirupsen/logrus"
 	arg "github.com/alexflint/go-arg"
@@ -47,10 +48,16 @@ type Command struct {
 
 	// go-arg parser for user input
 	flagParser *arg.Parser // might be nil
+
+	// mutex
+	sync.RWMutex
 }
 
 // buildCommand configurates the command from the public fields before it gets stored.
 func (cmd *Command) buildCommand() *Command {
+	cmd.Lock()
+	defer cmd.Unlock()
+
 	errArr := []error{}
 
 	// Build the command in layers..
