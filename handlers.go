@@ -55,7 +55,7 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 		// verify that user has permission to invoke this command
 		memberPermissions, err := ctx.Bot.Discord.UserChannelPermissions(m.Author.ID, m.ChannelID)
-		if err != nil || !cmd.invokableWithPermissions(uint32(memberPermissions)) {
+		if err != nil || !cmd.invokableWithPermissions(DiscordPermissionFlags(memberPermissions)) {
 			break //command was found but permission was denied, so just stop looking for another command
 		}
 

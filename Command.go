@@ -12,6 +12,10 @@ import (
 	shellquote "github.com/kballard/go-shellquote"
 )
 
+// DiscordPermissionFlags limits member accessability to discord guilds/channels functionality
+// 	https://discordapp.com/developers/docs/topics/permissions
+type DiscordPermissionFlags uint64
+
 // CommandAction command logic to be executed
 type CommandAction func(ctx *Context, msg *discordgo.Message, request string) error
 
@@ -41,7 +45,7 @@ type Command struct {
 	// Set the minimum required permissions for this command
 	//	This level is inherited into each subcommand and must be overwritten if else is desired
 	//	https://discordapp.com/developers/docs/topics/permissions
-	Permissions uint32
+	Permissions DiscordPermissionFlags
 
 	// Private
 	//
@@ -49,8 +53,8 @@ type Command struct {
 	// go-arg parser for user input
 	flagParser *arg.Parser // might be nil
 
-	// mutex
-	sync.RWMutex
+	// mutex since we don't create new command instances for each request
+	sync.RWMutex // TODO: should Command.Flags be copied after parsing, and send as an interface argument?
 }
 
 // buildCommand builds the parser, checks command requirements, and sets default values
@@ -118,7 +122,7 @@ func (cmd *Command) insistSubCommandDepth(depth int) error {
 }
 
 // invokableWithPermissions checks if the permissions given has the minimum access level
-func (cmd *Command) invokableWithPermissions(permissions uint32) bool {
+func (cmd *Command) invokableWithPermissions(permissions DiscordPermissionFlags) bool {
 	return (cmd.Permissions & permissions) == permissions
 }
 
