@@ -53,7 +53,7 @@ type Command struct {
 	sync.RWMutex
 }
 
-// buildCommand configurates the command from the public fields before it gets stored.
+// buildCommand builds the parser, checks command requirements, and sets default values
 func (cmd *Command) buildCommand() *Command {
 	cmd.Lock()
 	defer cmd.Unlock()
