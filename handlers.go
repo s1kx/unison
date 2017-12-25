@@ -3,6 +3,7 @@ package unison
 import (
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -58,6 +59,7 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 			break //command was found but permission was denied, so just stop looking for another command
 		}
 
+		logrus.Info("[unison] Invoking command " + cmd.Name)
 		go cmd.invoke(ctx, m.Message, request)
 
 		// command was found, stop looping
