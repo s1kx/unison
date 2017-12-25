@@ -138,3 +138,19 @@ func (cmd *Command) parseInput(input string) error {
 
 	return cmd.flagParser.Parse(args)
 }
+
+func (cmd *Command) invoke(ctx *Context, msg *discordgo.Message, request string) {
+	cmd.Lock()
+	defer cmd.Unlock()
+
+	// parse user input
+	if cmd.flagParser != nil {
+		cmd.parseInput(msg.Content)
+	}
+
+	// Invoke command
+	err := cmd.Action(ctx, msg, request)
+	if err != nil {
+		logrus.Errorf("Command [%s]: %s", cmd.Name, err)
+	}
+}

@@ -96,7 +96,6 @@ func Run(settings *Config) error {
 	if err != nil {
 		return err
 	}
-	bot.Run()
 
-	return nil
+	return bot.Run() // returns nil on successfull shutdown
 }
