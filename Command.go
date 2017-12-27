@@ -12,10 +12,6 @@ import (
 	shellquote "github.com/kballard/go-shellquote"
 )
 
-// DiscordPermissionFlags limits member accessability to discord guilds/channels functionality
-// 	https://discordapp.com/developers/docs/topics/permissions
-type DiscordPermissionFlags uint64
-
 // CommandAction command logic to be executed
 type CommandAction func(ctx *Context, msg *discordgo.Message, request string) error
 
@@ -45,7 +41,7 @@ type Command struct {
 	// Set the minimum required permissions for this command
 	//	This level is inherited into each subcommand and must be overwritten if else is desired
 	//	https://discordapp.com/developers/docs/topics/permissions
-	Permissions DiscordPermissionFlags
+	Permissions DiscordPermissions
 
 	// Private
 	//
@@ -76,8 +72,8 @@ func (cmd *Command) buildCommand() *Command {
 
 	// Not sure if this matters, but make sure the User can write in the same channel that the bot
 	// gets triggered from. Some one that cannot send a message should never be able to trigger a command.
-	if cmd.Permissions == 0 {
-		cmd.Permissions = 0x00000800
+	if cmd.Permissions.Get() == 0 {
+		cmd.Permissions.Set(0x00000800)
 	}
 
 	// check for issues
@@ -122,8 +118,8 @@ func (cmd *Command) insistSubCommandDepth(depth int) error {
 }
 
 // invokableWithPermissions checks if the permissions given has the minimum access level
-func (cmd *Command) invokableWithPermissions(permissions DiscordPermissionFlags) bool {
-	return (cmd.Permissions & permissions) == permissions
+func (cmd *Command) invokableWithPermissions(permissions *DiscordPermissions) bool {
+	return cmd.Permissions.HasRequiredPermissions(permissions)
 }
 
 func (cmd *Command) parseInput(input string) error {

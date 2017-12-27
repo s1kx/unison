@@ -55,8 +55,10 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 		// verify that user has permission to invoke this command
 		memberPermissions, err := ctx.Bot.Discord.UserChannelPermissions(m.Author.ID, m.ChannelID)
-		if err != nil || !cmd.invokableWithPermissions(DiscordPermissionFlags(memberPermissions)) {
-			logrus.Info("[unison] User " + m.Author.String() + " tried to invoke unaccessable command: " + cmd.Name + ". User permission: " + string(memberPermissions))
+		permissions := &DiscordPermissions{}
+		permissions.Set(DiscordPermissionFlags(memberPermissions))
+		if err != nil || !cmd.invokableWithPermissions(permissions) {
+			logrus.Info("[unison] User " + m.Author.String() + " tried to invoke unaccessable command: " + cmd.Name + ". User permission: " + permissions.ToStr())
 			break //command was found but permission was denied, so just stop looking for another command
 		}
 
