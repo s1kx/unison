@@ -111,6 +111,7 @@ func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
 
 // Run Start the bot instance
 func (bot *Bot) Run() error {
+	logrus.Info("lol")
 	// Add handler to wait for ready state in order to initialize the bot fully.
 	bot.Discord.AddHandler(bot.onReady)
 
@@ -180,6 +181,7 @@ func (bot *Bot) RegisterCommand(cmd *Command) error {
 		return &DuplicateCommandError{Existing: ex, New: cmd, Name: name}
 	}
 
+	logrus.Info("[unison] Registerred command: " + cmd.Name)
 	bot.commandMap[name] = cmd.buildCommand()
 
 	// TODO: Register aliases
