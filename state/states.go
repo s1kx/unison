@@ -5,23 +5,23 @@ import (
 )
 
 // Type state type
-type Type uint8
+//type Type uint8
 
 // ToStr convert state.Type into string
-func ToStr(state Type) string {
+func ToStr(state uint8) string {
 	return strconv.Itoa(int(state))
 }
 
 // IsReserved check if given state is reserved. These cannot be used for custom states.
 // Custom states starts at 11 and ends at 255. custom state range [11, 255].
-func IsReserved(state Type) bool {
+func IsReserved(state uint8) bool {
 	return state >= 0 && state <= 10
 }
 
 // Different reserved states
 const (
 	// MissingState is used when no state was specified
-	MissingState Type = iota // 0
+	MissingState uint8 = iota // 0
 	// Normal is the default bot state
 	Normal // 1
 

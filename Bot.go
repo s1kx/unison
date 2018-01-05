@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/andersfylling/unison/constant"
 	"github.com/andersfylling/unison/state"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
@@ -152,7 +153,7 @@ func (bot *Bot) Run() error {
 	}
 
 	// create a add bot url
-	logrus.Infof("Add bot using: https://discordapp.com/oauth2/authorize?client_id=%s&scope=bot", bot.Discord.State.User.ID)
+	logrus.Info("Add bot using: https://discordapp.com/oauth2/authorize?scope=bot&client_id=" + bot.Discord.State.User.ID)
 
 	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
 	termSignal = make(chan os.Signal, 1)
@@ -281,11 +282,11 @@ func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
 	}
 	if st == state.MissingState {
 
-		err := state.SetGuildState(guildID, state.DefaultState)
+		err := state.SetGuildState(guildID, constant.DefaultState)
 		if err != nil {
 			logrus.Error("Unable to set default state for guild " + event.Guild.Name)
 		} else {
-			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(state.DefaultState) + "`")
+			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(constant.DefaultState) + "`")
 		}
 	} else {
 		logrus.Info("Checked Guild `" + event.Guild.Name + "`, with state `" + state.ToStr(st) + "`")

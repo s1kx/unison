@@ -21,7 +21,7 @@ var instance *singleton
 var once sync.Once
 
 // DefaultState bot state for new newly added guilds
-var DefaultState = Normal
+// var DefaultState = Normal
 
 // GetDatabaseInstance get a bolt database instance.
 // TODO: defer close?
@@ -87,7 +87,7 @@ func SetGuildValue(bucket, key string, val []byte) error {
 }
 
 // GetGuildState returns the state of guild
-func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (Type, error) {
+func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (uint8, error) {
 
 	val, err := GetGuildValue(guildID, constant.StateKey)
 	if err != nil {
@@ -100,11 +100,11 @@ func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (Type, e
 		return 0, err
 	}
 
-	return Type(i), nil
+	return uint8(i), nil
 }
 
 // SetGuildState updates the guild state in database
-func SetGuildState(guildID string, state Type) error {
+func SetGuildState(guildID string, state uint8) error {
 	err := SetGuildValue(guildID, constant.StateKey, []byte(ToStr(state)))
 
 	return err
