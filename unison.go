@@ -87,9 +87,14 @@ func Run(settings *Config) error {
 			}
 
 			uState = state.Type(i)
+
+			// fallback
+			if uState == state.MissingState {
+				uState = state.Normal
+			}
 		}
 	}
-	state.DefaultState = uState
+	settings.BotState = uState
 
 	// Initialize and start bot
 	bot, err := newBot(settings, ds)

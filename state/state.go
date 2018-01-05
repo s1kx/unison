@@ -87,7 +87,7 @@ func SetGuildValue(bucket, key string, val []byte) error {
 }
 
 // GetGuildState returns the state of guild
-func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (uint8, error) {
+func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (Type, error) {
 
 	val, err := GetGuildValue(guildID, constant.StateKey)
 	if err != nil {
@@ -100,11 +100,11 @@ func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (uint8, 
 		return 0, err
 	}
 
-	return uint8(i), nil
+	return Type(i), nil
 }
 
 // SetGuildState updates the guild state in database
-func SetGuildState(guildID string, state uint8) error {
+func SetGuildState(guildID string, state Type) error {
 	err := SetGuildValue(guildID, constant.StateKey, []byte(ToStr(state)))
 
 	return err

@@ -24,7 +24,4 @@ const (
 
 	// DefaultDatabaseFile file name for key/value database
 	DefaultDatabaseFile = "unisonStates.db"
-
-	// DefaultState guild state for bot behavior
-	DefaultState = uint8(1) //state.Normal
 )

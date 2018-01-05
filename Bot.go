@@ -6,7 +6,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/andersfylling/unison/constant"
 	"github.com/andersfylling/unison/state"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
@@ -36,6 +35,9 @@ type Bot struct {
 
 	state state.Type // default bot state
 }
+
+// This is awful and needs to be handled. It's used in "onGuildJoin" func
+var defaultGuildState state.Type
 
 func newBot(config *Config, ds *discordgo.Session) (*Bot, error) {
 	commandPrefixes := []string{}
@@ -112,7 +114,6 @@ func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
 
 // Run Start the bot instance
 func (bot *Bot) Run() error {
-	logrus.Info("lol")
 	// Add handler to wait for ready state in order to initialize the bot fully.
 	bot.Discord.AddHandler(bot.onReady)
 
@@ -123,6 +124,7 @@ func (bot *Bot) Run() error {
 	})
 
 	// Handle joining new guilds
+	defaultGuildState = bot.BotState /// ugh...
 	bot.Discord.AddHandler(onGuildJoin)
 
 	// Open the websocket and begin listening.
@@ -281,12 +283,12 @@ func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
 		// should this be handled? 0.o
 	}
 	if st == state.MissingState {
-
-		err := state.SetGuildState(guildID, constant.DefaultState)
+		selectedState := defaultGuildState
+		err := state.SetGuildState(guildID, selectedState)
 		if err != nil {
 			logrus.Error("Unable to set default state for guild " + event.Guild.Name)
 		} else {
-			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(constant.DefaultState) + "`")
+			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(selectedState) + "`")
 		}
 	} else {
 		logrus.Info("Checked Guild `" + event.Guild.Name + "`, with state `" + state.ToStr(st) + "`")
