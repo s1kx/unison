@@ -17,7 +17,7 @@ type EventHook struct {
 	Name string
 
 	// Description of what the hook does
-	Description string
+	Usage string
 
 	// Events that the hook should react to
 	Events []events.EventType
