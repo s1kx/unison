@@ -3,7 +3,7 @@ package unison
 import (
 	"testing"
 
-	"github.com/bwmarrin/discordgo"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 func testCommandAction(ctx *Context, msg *discordgo.Message, request string) error {

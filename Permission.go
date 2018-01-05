@@ -3,7 +3,7 @@ package unison
 import (
 	"strconv"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // DiscordPermissionFlags limits member accessability to discord guilds/channels functionality

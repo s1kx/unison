@@ -3,7 +3,7 @@ package unison
 import (
 	"os"
 
-	"github.com/bwmarrin/discordgo"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 // used to detect interupt signals and handle graceful shut down

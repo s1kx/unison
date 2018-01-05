@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
 	arg "github.com/alexflint/go-arg"
 	"github.com/andersfylling/unison/constant"
-	"github.com/bwmarrin/discordgo"
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 // CommandAction command logic to be executed

@@ -3,7 +3,7 @@ package events
 import (
 	"fmt"
 
-	"github.com/bwmarrin/discordgo"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 type InvalidEventTypeError struct {
@@ -68,7 +68,7 @@ func GetEventType(v interface{}) (t EventType, err error) {
 	case *discordgo.GuildMemberRemove:
 		t = GuildMemberRemoveEvent
 
-	// Guild role events 
+	// Guild role events
 	case *discordgo.GuildRoleCreate:
 		t = GuildRoleCreateEvent
 	case *discordgo.GuildRoleUpdate:

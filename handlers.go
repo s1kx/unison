@@ -3,8 +3,8 @@ package unison
 import (
 	"strings"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
