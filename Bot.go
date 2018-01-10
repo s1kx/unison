@@ -1,6 +1,7 @@
 package unison
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -124,8 +125,10 @@ func (bot *Bot) Run() error {
 	})
 
 	// Handle joining new guilds
-	defaultGuildState = bot.BotState /// ugh...
-	bot.Discord.AddHandler(onGuildJoin)
+	if !bot.DisableBoltDatabase {
+		defaultGuildState = bot.BotState /// ugh...
+		bot.Discord.AddHandler(onGuildJoin)
+	}
 
 	// Open the websocket and begin listening.
 	logrus.Info("Opening WS connection to Discord .. ")
@@ -248,21 +251,33 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 
 // GetState retrieves the state for given guild
 func (bot *Bot) GetState(guildID string) (state.Type, error) {
+	if bot.DisableBoltDatabase {
+		return state.MissingState, errors.New("bolt(key-value) database has been disabled in config struct")
+	}
 	return state.GetGuildState(guildID)
 }
 
 // SetState updates state for given guild
 func (bot *Bot) SetState(guildID string, st state.Type) error {
+	if bot.DisableBoltDatabase {
+		return errors.New("bolt(key-value) database has been disabled in config struct")
+	}
 	return state.SetGuildState(guildID, st)
 }
 
 // GetGuildValue returns a value from the bots key/value database
 func (bot *Bot) GetGuildValue(guildID, key string) ([]byte, error) {
+	if bot.DisableBoltDatabase {
+		return []byte(""), errors.New("bolt(key-value) database has been disabled in config struct")
+	}
 	return state.GetGuildValue(guildID, key)
 }
 
 // SetGuildValue updates/inserts a key-value into the given guild bucket
 func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
+	if bot.DisableBoltDatabase {
+		return errors.New("bolt(key-value) database has been disabled in config struct")
+	}
 	return state.SetGuildValue(guildID, key, val)
 }
 
@@ -281,7 +296,7 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 }
 
 func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
-
+	// NOTE! don't run if the config.DisableBoltDatabase is true
 	if event.Guild.Unavailable {
 		return
 	}
