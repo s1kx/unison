@@ -48,12 +48,12 @@ func GetInstance() (*bolt.DB, error) {
 // GetGuildValue retrieves a value using guildID and a key
 // bucket == GuildID
 func GetGuildValue(bucket, key string) ([]byte, error) {
+	var val []byte
 	db, err := GetInstance()
 	if err != nil {
-		return nil, err
+		return val, err
 	}
 
-	var val []byte
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		if b == nil {
