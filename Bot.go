@@ -256,6 +256,16 @@ func (bot *Bot) SetState(guildID string, st state.Type) error {
 	return state.SetGuildState(guildID, st)
 }
 
+// GetGuildValue returns a value from the bots key/value database
+func (bot *Bot) GetGuildValue(guildID, key string) ([]byte, error) {
+	return state.GetGuildValue(guildID, key)
+}
+
+// SetGuildValue updates/inserts a key-value into the given guild bucket
+func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
+	return state.SetGuildValue(guildID, key, val)
+}
+
 // Event listeners
 //
 
