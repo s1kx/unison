@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/andersfylling/unison/events"
+	"github.com/sirupsen/logrus"
 )
 
 // EventHandlerFunc handles a discord event and returns whether it handles the

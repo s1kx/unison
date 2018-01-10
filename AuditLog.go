@@ -2,8 +2,8 @@ package unison
 
 import (
 	"encoding/json"
-	"errors"
-  "gopkg.in/bwmarrin/Discordgo.v0"
+
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 type AuditLogChange struct {
@@ -31,12 +31,12 @@ type AuditLog struct {
 // GetAuditLogs Get the last 50 audit logs for the given guild
 func GetAuditLogs(ctx *Context, guildID string) (*AuditLog, error) {
 	byteArr, err := ctx.Discord.Request("GET", discordgo.EndpointGuilds+guildID+"/audit-logs", nil)
-  
+
 	auditLog := &AuditLog{}
-	err = json.Unmarshal(bytes, &auditLog)
+	err = json.Unmarshal(byteArr, &auditLog)
 	if err != nil {
 		return nil, err
 	}
-  
-  return auditLog, nil
+
+	return auditLog, nil
 }
