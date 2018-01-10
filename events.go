@@ -95,7 +95,10 @@ func (d *eventDispatcher) Dispatch(ctx *Context, event *events.DiscordEvent, sel
 
 	for _, hook := range hooks {
 		// TODO: Run event handler in goroutine
-		hook.OnEvent(ctx, event, self)
+		_, err := hook.OnEvent(ctx, event, self)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 
 	return nil
