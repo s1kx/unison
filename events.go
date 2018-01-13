@@ -10,7 +10,7 @@ import (
 // EventHandlerFunc handles a discord event and returns whether it handles the
 // event type and if an error occured.
 // self is true if event was fired by bot. eg bot sent a message to someone.
-type EventHandlerFunc func(ctx *Context, ev *events.DiscordEvent, self bool) (handled bool, err error)
+type EventHandlerFunc func(ctx *Context, ev *events.DiscordEvent, self bool) error
 
 // EventHook interface for anything that is supposed to react on a event, besides commands.
 type EventHook struct {
@@ -96,7 +96,7 @@ func (d *eventDispatcher) Dispatch(ctx *Context, event *events.DiscordEvent, sel
 
 	for _, hook := range hooks {
 		// TODO: Run event handler in goroutine
-		_, err := hook.OnEvent(ctx, event, self)
+		err := hook.OnEvent(ctx, event, self)
 		if err != nil {
 			logrus.Error(err)
 		}

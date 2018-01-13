@@ -63,7 +63,7 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 		}
 
 		logrus.Info("[unison] Invoking command " + cmd.Name)
-		go cmd.invoke(ctx, m.Message, request)
+		cmd.invoke(ctx, m.Message, request)
 
 		// command was found, stop looping
 		break
