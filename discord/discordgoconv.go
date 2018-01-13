@@ -276,6 +276,15 @@ func NewChannelFromDiscordgo(c *discordgo.Channel) *Channel {
 }
 
 func NewVoiceStateFromDiscordgo(vs *discordgo.VoiceState) *VoiceState {
-	return &VoiceState{}
-	// TODO
+	return &VoiceState{
+		UserID:    discordgoIDStringToUint64(vs.UserID),
+		SessionID: discordgoIDStringToUint64(vs.SessionID),
+		ChannelID: discordgoIDStringToUint64(vs.ChannelID),
+		GuildID:   discordgoIDStringToUint64(vs.GuildID),
+		Suppress:  vs.Suppress,
+		SelfMute:  vs.SelfMute,
+		SelfDeaf:  vs.SelfDeaf,
+		Mute:      vs.Mute,
+		Deaf:      vs.Deaf,
+	}
 }
