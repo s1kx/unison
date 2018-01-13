@@ -44,8 +44,8 @@ func discordgoAttachmentArrayToDiscordAttachmentArray(as []*discordgo.MessageAtt
 	return attachments
 }
 
-func discordgoTimestampToTime(ts string) time.Time {
-	timestamp, err := time.Parse(discordgoTimestampLayout, ts)
+func discordgoTimestampToTime(ts discordgo.Timestamp) time.Time {
+	timestamp, err := time.Parse(discordgoTimestampLayout, string(ts))
 	if err != nil {
 		panic(err)
 		//return time.Now() // this is so bad..
