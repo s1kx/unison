@@ -3,11 +3,12 @@ package unison
 import (
 	"strings"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
+	var err error
 	content := strings.TrimSpace(m.Content)
 
 	// start [SwissCheeze]
@@ -24,9 +25,17 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 
 	// Only handle commands with the right prefix, when not in a PM channel
 	// This also removes potential command prefixes just in case
-	legitCommandPrefix, request := identifiesAsCommand(content, ctx)
-	channel, channelErr := ctx.Discord.Channel(m.ChannelID)
-	if channelErr != nil || (channel.Type != 1 && !legitCommandPrefix) {
+	var legitCommandPrefix bool
+	var request string
+	for _, prefix := range ctx.Bot.CommandPrefix {
+		legitCommandPrefix, request = identifiesAsCommand(content, prefix)
+
+		if legitCommandPrefix {
+			break
+		}
+	}
+	channel, err := ctx.Discord.Channel(m.ChannelID)
+	if err != nil || (channel.Type != 1 && !legitCommandPrefix) {
 		return
 	}
 	// end [SwissCheeze]
@@ -37,22 +46,24 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 			continue
 		}
 
-		request = removePrefix(request, name)
+		// remove the command prefix
+		//request = removePrefix(request, name) // depratecated after subcommands was added
+		// TODO: call func recursively for sub commands
 
 		// commands that works on guild related matters should not be runnable from a PM(!)
 		// TODO: write guild requirement check
 
 		// verify that user has permission to invoke this command
-		member, memberErr := ctx.Discord.GuildMember(channel.GuildID, m.Author.ID)
-		if memberErr != nil || !cmd.invokableByMember(member) {
+		memberPermissions, err := ctx.Bot.Discord.UserChannelPermissions(m.Author.ID, m.ChannelID)
+		permissions := &DiscordPermissions{}
+		permissions.Set(DiscordPermissionFlags(memberPermissions))
+		if err != nil || !cmd.invokableWithPermissions(permissions) {
+			logrus.Info("[unison] User " + m.Author.String() + " tried to invoke unaccessable command: " + cmd.Name + ". User permission: " + permissions.ToStr())
 			break //command was found but permission was denied, so just stop looking for another command
 		}
 
-		// Invoke command
-		err := cmd.Action(ctx, m.Message, request)
-		if err != nil {
-			logrus.Errorf("Command [%s]: %s", name, err)
-		}
+		logrus.Info("[unison] Invoking command " + cmd.Name)
+		go cmd.invoke(ctx, m.Message, request)
 
 		// command was found, stop looping
 		break
@@ -60,23 +71,35 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 }
 
 // Check if a message content string is a valid command by it's prefix "!" or bot mention
-func identifiesAsCommand(content string, ctx *Context) (status bool, updatedContent string) {
-	failure := false
-	success := true
-
-	// For every prefix entry set by botSettings, go through until a match
-	for _, prefix := range ctx.Bot.commandPrefixes {
-		if strings.HasPrefix(content, prefix) {
-			return success, removePrefix(content, prefix)
+func identifiesAsCommand(content, prefix string) (status bool, updatedContent string) {
+	if strings.HasPrefix(content, prefix) {
+		// remove duplicate command prefixes
+		result := removePrefix(content, prefix)
+		for {
+			if !strings.HasPrefix(result, prefix) {
+				break
+			} else {
+				result = removePrefix(result, prefix)
+			}
 		}
+
+		// make sure there is content after removing the command prefix
+		if len(result) > 0 {
+			return true, result
+		}
+		return false, result
 	}
 
-	// None of the conditions were met so this is considered a failure
-	return failure, content
+	return false, content
 }
 
 // Removes a substring from the string and cleans up leading & trailing spaces.
 func removePrefix(str, remove string) string {
 	result := strings.TrimPrefix(str, remove)
-	return strings.TrimSpace(result)
+	result = strings.TrimSpace(result)
+
+	if str[0] == ' ' {
+		return result[1:len(result)]
+	}
+	return result
 }

@@ -39,3 +39,4 @@ We use the following guidelines:
 
 * [Semantic Versioning](http://semver.org)
 * Git flow as outlined in [this article](http://nvie.com/posts/a-successful-git-branching-model/)
+* [GitHub scrum workflow](https://github.com/jvandemo/github-scrum-workflow)
