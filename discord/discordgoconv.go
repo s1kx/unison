@@ -35,6 +35,15 @@ func uint64ToString(id uint64) string {
 	return strconv.FormatUint(id, 10)
 }
 
+func discordgoAttachmentArrayToDiscordAttachmentArray(as []*discordgo.MessageAttachment) []*Attachment {
+	attachments := make([]*Attachment, 0, len(as))
+	for i, a := range as {
+		attachments[i] = NewAttachmentFromDiscordgo(a)
+	}
+
+	return attachments
+}
+
 func discordgoTimestampToTime(ts string) time.Time {
 	timestamp, err := time.Parse(discordgoTimestampLayout, ts)
 	if err != nil {
