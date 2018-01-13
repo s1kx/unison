@@ -6,10 +6,10 @@ import (
 	"sync"
 
 	arg "github.com/alexflint/go-arg"
-	"github.com/andersfylling/unison/constant"
+	"github.com/bwmarrin/discordgo"
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/s1kx/unison/constant"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 // CommandAction command logic to be executed

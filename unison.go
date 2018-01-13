@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/andersfylling/unison/constant"
-	"github.com/andersfylling/unison/state"
+	"github.com/bwmarrin/discordgo"
+	"github.com/s1kx/unison/constant"
+	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 var logFormatter = logrus.TextFormatter{
