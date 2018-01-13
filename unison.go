@@ -1,6 +1,7 @@
 package unison
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/andersfylling/unison/constant"
 	"github.com/andersfylling/unison/state"
+	"github.com/andersfylling/unison/unisonstruct"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
 )
@@ -108,4 +110,19 @@ func Run(settings *Config) error {
 	}
 
 	return bot.Run() // returns nil on successfull shutdown
+}
+
+// GetAuditLogs Get the last 50 audit logs for the given guild
+//	params interface{} is a struct with json tags that are converted into GET url parameters
+func GetAuditLogs(ctx *Context, guildID string, params interface{}) (*unisonstruct.AuditLog, error) {
+	urlParams := "" //convertAuditLogParamsToStr(params)
+	byteArr, err := ctx.Discord.Request("GET", discordgo.EndpointGuilds+guildID+"/audit-logs"+urlParams, nil)
+
+	auditLog := &unisonstruct.AuditLog{}
+	err = json.Unmarshal(byteArr, &auditLog)
+	if err != nil {
+		return nil, err
+	}
+
+	return auditLog, nil
 }

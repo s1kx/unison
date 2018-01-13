@@ -12,6 +12,18 @@ import (
 	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
+type CommandInterface interface {
+	Name() string
+	Description() string
+	Deactivated() bool
+	Flags() interface{}
+	Permissions() uint64
+	Action(ctx *Context, msg *discordgo.Message, request string) error
+}
+
+type CommandHolder struct {
+}
+
 // CommandAction command logic to be executed
 type CommandAction func(ctx *Context, msg *discordgo.Message, request string) error
 
