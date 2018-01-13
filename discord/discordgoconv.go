@@ -324,5 +324,10 @@ func NewVoiceStateFromDiscordgo(vs *discordgo.VoiceState) *VoiceState {
 }
 
 func NewPermissionOverwriteFromDiscordgo(pm *discordgo.PermissionOverwrite) *PermissionOverwrite {
-	return &PermissionOverwrite{}
+	return &PermissionOverwrite{
+		ID:    discordgoIDStringToUint64(pm.ID),
+		Type:  pm.Type,
+		Deny:  pm.Deny,
+		Allow: pm.Allow,
+	}
 }
