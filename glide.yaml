@@ -1,4 +1,4 @@
-package: github.com/andersfylling/unison
+package: github.com/s1kx/unison
 import:
 - package: github.com/sirupsen/logrus
   version: ^0.11.5
