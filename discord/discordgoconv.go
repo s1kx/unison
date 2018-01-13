@@ -136,6 +136,10 @@ func discordgoVerificationLevelToUint8(vl discordgo.VerificationLevel) uint8 {
 	return uint8(vl)
 }
 
+func discordgoStatusToString(s discordgo.Status) string {
+	return string(s)
+}
+
 // Struct converters
 //
 
@@ -257,8 +261,13 @@ func NewGuildMemberFromDiscordgo(m *discordgo.Member) *GuildMember {
 }
 
 func NewPresenceFromDiscordgo(p *discordgo.Presence) *Presence {
-	return &Presence{}
-	// TODO
+	return &Presence{
+		User:  NewUserFromDiscordgo(p.User),
+		Roles: discordgoIDStringArrayToUint64Array(p.Roles),
+		// Game: NewActivityFromDiscordgo(p.Activity), // not implemented by discordgo...
+		// GuildID: discordgoIDStringToUint64(p.GuildID), // not implemented by discordgo..
+		Status: discordgoStatusToString(p.Status),
+	}
 }
 
 func NewChannelFromDiscordgo(c *discordgo.Channel) *Channel {
