@@ -22,6 +22,15 @@ func discordgoIDStringToUint64(id string) uint64 {
 	return u
 }
 
+func discordgoIDStringArrayToUint64Array(ids []string) []uint64 {
+	newIDS := make([]uint64, 0, len(ids))
+	for i, id := range ids {
+		newIDS[i] = discordgoIDStringToUint64(id)
+	}
+
+	return newIDS
+}
+
 func uint64ToString(id uint64) string {
 	return strconv.FormatUint(id, 10)
 }
