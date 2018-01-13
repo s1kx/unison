@@ -1,13 +1,17 @@
-hash: a8509ef58fa072c9b119a2474f0d29ad97bf943334f800e9a91a5aeff4301d6c
-updated: 2017-11-24T02:54:16.73467264+01:00
+hash: 811eb378f747681f5180bcf84ccc41fc2ba375b798042e2d053d58ffc91b36a7
+updated: 2018-01-05T16:49:33.579043968+01:00
 imports:
+- name: github.com/alexflint/go-arg
+  version: 59fccacb2679dde66e0b20ed65bd26178fcbf54e
+- name: github.com/alexflint/go-scalar
+  version: 45e5d6cd8605faef82fda2bacc59e734a0b6f1f0
 - name: github.com/boltdb/bolt
   version: 2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8
-- name: github.com/bwmarrin/discordgo
-  version: 9bb722e4fe22296d7d0726e661eddadee2335ba1
 - name: github.com/gorilla/websocket
   version: 71fa72d4842364bc5f74185f4161e0099ea3624a
-- name: github.com/Sirupsen/logrus
+- name: github.com/kballard/go-shellquote
+  version: cd60e84ee657ff3dc51de0b4f55dd299a3e136f2
+- name: github.com/sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: golang.org/x/crypto
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
@@ -19,4 +23,6 @@ imports:
   version: 686000749eaec0b8855b8eef5336cf63899fe51d
   subpackages:
   - unix
+- name: gopkg.in/bwmarrin/Discordgo.v0
+  version: 4a33b9bc7c56cfdb9bb244e33e83cb3941fe2bdc
 testImports: []

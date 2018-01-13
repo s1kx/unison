@@ -7,10 +7,8 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/s1kx/unison/constant"
 )
-
-const stateKey = "state"
-const defaultDatabaseFile = "unisonStates.db"
 
 // singleton pattern to handle a key value database for keeping track of bots current state relative to guild ID.
 // https://github.com/boltdb/bolt
@@ -23,7 +21,7 @@ var instance *singleton
 var once sync.Once
 
 // DefaultState bot state for new newly added guilds
-var DefaultState = Normal
+// var DefaultState = Normal
 
 // GetDatabaseInstance get a bolt database instance.
 // TODO: defer close?
@@ -44,18 +42,18 @@ func GetDatabaseInstance(file string) (*bolt.DB, error) {
 
 // GetInstance get a bolt database instance using the default database file
 func GetInstance() (*bolt.DB, error) {
-	return GetDatabaseInstance(defaultDatabaseFile)
+	return GetDatabaseInstance(constant.DefaultDatabaseFile)
 }
 
 // GetGuildValue retrieves a value using guildID and a key
 // bucket == GuildID
 func GetGuildValue(bucket, key string) ([]byte, error) {
+	var val []byte
 	db, err := GetInstance()
 	if err != nil {
-		return nil, err
+		return val, err
 	}
 
-	var val []byte
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		if b == nil {
@@ -91,7 +89,7 @@ func SetGuildValue(bucket, key string, val []byte) error {
 // GetGuildState returns the state of guild
 func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (Type, error) {
 
-	val, err := GetGuildValue(guildID, stateKey)
+	val, err := GetGuildValue(guildID, constant.StateKey)
 	if err != nil {
 		return 0, err
 	}
@@ -107,7 +105,7 @@ func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (Type, e
 
 // SetGuildState updates the guild state in database
 func SetGuildState(guildID string, state Type) error {
-	err := SetGuildValue(guildID, stateKey, []byte(ToStr(state)))
+	err := SetGuildValue(guildID, constant.StateKey, []byte(ToStr(state)))
 
 	return err
 }

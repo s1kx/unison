@@ -5,132 +5,18 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
 	"syscall"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/s1kx/unison/state"
-	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/bwmarrin/Discordgo.v0"
 
 	"github.com/s1kx/unison/events"
 )
 
-// EnvUnisonDiscordToken environment string to collect discord bot token.
-const EnvUnisonDiscordToken = "UNISON_DISCORD_TOKEN"
-
-// EnvUnisonCommandPrefix The command prefix to trigger commands. Defaults to mention. @botname
-const EnvUnisonCommandPrefix = "UNISON_COMMAND_PREFIX"
-
-// EnvUnisonState the default bot state. Defaults to 0. "normal"
-const EnvUnisonState = "UNISON_STATE"
-
-// DiscordGoBotTokenPrefix discordgo requires this token prefix
-const DiscordGoBotTokenPrefix = "Bot "
-
-// used to detect interupt signals and handle graceful shut down
-var termSignal chan os.Signal
-
-// BotSettings contains the definition of bot behavior.
-// It is used for creating the actual bot.
-type BotSettings struct {
-	Token         string
-	CommandPrefix string
-	BotState      state.Type
-
-	Commands   []*Command
-	EventHooks []*EventHook
-	Services   []*Service
-}
-
-// Run start the bot. Connect to discord, setup commands, hooks and services.
-func Run(settings *BotSettings) error {
-	// TODO: Validate commands
-
-	// three steps are done before setting up a connection.
-	// 1. Make sure the discord token exists.
-	// 2. Set a prefered way of triggering commands.
-	//		This must be done after establishin a discord socket. See bot.onReady()
-	// 3. Decide the bot state.
-
-	// 1. Make sure the discord token exists.
-	//
-	token := settings.Token
-	// if it was not specified in the Settings struct, check the environment variable
-	if token == "" {
-		token = os.Getenv(EnvUnisonDiscordToken)
-
-		// if the env var was empty as well, crash the bot as this is required.
-		if token == "" {
-			return errors.New("Missing env var " + EnvUnisonDiscordToken + ". This is required. Specify in either Settings struct or env var.")
-		}
-
-		logrus.Info("Using bot token from environment variable.")
-	}
-	// discordgo requires "Bot " prefix for Bot applications
-	if !strings.HasPrefix(token, DiscordGoBotTokenPrefix) {
-		token = DiscordGoBotTokenPrefix + token
-	}
-
-	// Initialize discord client
-	ds, err := discordgo.New(token)
-	if err != nil {
-		return err
-	}
-
-	// 2. Set a prefered way of triggering commands
-	//
-	cprefix := settings.CommandPrefix
-	// if not given, check the environment variable
-	if cprefix == "" {
-		cprefix = os.Getenv(EnvUnisonCommandPrefix)
-
-		// in case this was not set, we trigger by mention
-		if cprefix == "" {
-			// This must be set after web socket connection has been opened
-			// as the username of the bot is still unknown at this stage.
-			// cprefix = ds.State.User.Mention()
-		}
-
-		// update Settings
-		settings.CommandPrefix = cprefix
-	}
-	logrus.Info("Commands are triggered by `" + cprefix + "`")
-
-	// 3. Decide the bot state.
-	//
-	uState := settings.BotState
-	// check if valid state
-	if uState == state.MissingState {
-		// chjeck environment variable
-		uStateStr := os.Getenv(EnvUnisonState)
-
-		if uStateStr == "" {
-			uState = state.Normal // uint8(1)
-		} else {
-			i, e := strconv.ParseInt(uStateStr, 10, 16)
-			if e != nil {
-				return e
-			}
-
-			uState = state.Type(i)
-		}
-	}
-	state.DefaultState = uState
-
-	// Initialize and start bot
-	bot, err := newBot(settings, ds)
-	if err != nil {
-		return err
-	}
-	bot.Run()
-
-	return nil
-}
-
 // Bot is an active bot session.
 type Bot struct {
-	*BotSettings
+	*Config
 	Discord *discordgo.Session
 
 	// Lookup map for name/alias => command
@@ -142,8 +28,8 @@ type Bot struct {
 
 	eventDispatcher *eventDispatcher
 
-	// Command prefix
-	commandPrefix string
+	// Command prefixes
+	commandPrefix []string
 
 	readyState *discordgo.Ready
 	User       *discordgo.User
@@ -151,18 +37,28 @@ type Bot struct {
 	state state.Type // default bot state
 }
 
-func newBot(settings *BotSettings, ds *discordgo.Session) (*Bot, error) {
+// This is awful and needs to be handled. It's used in "onGuildJoin" func
+var defaultGuildState state.Type
+
+func newBot(config *Config, ds *discordgo.Session) (*Bot, error) {
+	commandPrefixes := []string{}
+
+	// add desired prefixes
+	for _, prefix := range config.CommandPrefix {
+		commandPrefixes = append(commandPrefixes, prefix)
+	}
+
 	// Initialize bot
 	bot := &Bot{
-		BotSettings: settings,
-		Discord:     ds,
+		Config:  config,
+		Discord: ds,
 
 		commandMap:      make(map[string]*Command),
 		eventHookMap:    make(map[string]*EventHook),
 		serviceMap:      make(map[string]*Service),
 		eventDispatcher: newEventDispatcher(),
 
-		commandPrefix: settings.CommandPrefix,
+		commandPrefix: commandPrefixes,
 	}
 
 	// Register commands
@@ -229,7 +125,10 @@ func (bot *Bot) Run() error {
 	})
 
 	// Handle joining new guilds
-	bot.Discord.AddHandler(onGuildJoin)
+	if !bot.DisableBoltDatabase {
+		defaultGuildState = bot.BotState /// ugh...
+		bot.Discord.AddHandler(onGuildJoin)
+	}
 
 	// Open the websocket and begin listening.
 	logrus.Info("Opening WS connection to Discord .. ")
@@ -238,11 +137,11 @@ func (bot *Bot) Run() error {
 		return fmt.Errorf("error: %s", err)
 	}
 	logrus.Info("OK")
-	
-	// check how the bot is triggered. if it's "", we set it by mention
-	if bot.commandPrefix == "" {
-		bot.commandPrefix = bot.Discord.State.User.Mention()
-		bot.BotSettings.CommandPrefix = bot.commandPrefix
+
+	// add trigger by mention unless disabled in config
+	if !bot.Config.DisableMentionTrigger {
+		bot.commandPrefix = append(bot.commandPrefix, bot.Discord.State.User.Mention())
+		bot.Config.CommandPrefix = bot.commandPrefix
 	}
 
 	// Create context for services
@@ -259,7 +158,7 @@ func (bot *Bot) Run() error {
 	}
 
 	// create a add bot url
-	logrus.Infof("Add bot using: https://discordapp.com/oauth2/authorize?client_id=%s&scope=bot", bot.Discord.State.User.ID)
+	logrus.Info("Add bot using: https://discordapp.com/oauth2/authorize?scope=bot&client_id=" + bot.Discord.State.User.ID)
 
 	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
 	termSignal = make(chan os.Signal, 1)
@@ -281,18 +180,22 @@ func (bot *Bot) Run() error {
 	return nil
 }
 
+// RegisterCommand ...
 func (bot *Bot) RegisterCommand(cmd *Command) error {
 	name := cmd.Name
 	if ex, exists := bot.commandMap[name]; exists {
 		return &DuplicateCommandError{Existing: ex, New: cmd, Name: name}
 	}
-	bot.commandMap[name] = cmd
+
+	logrus.Info("[unison] Registerred command: " + cmd.Name)
+	bot.commandMap[name] = cmd.buildCommand()
 
 	// TODO: Register aliases
 
 	return nil
 }
 
+// RegisterEventHook ...
 func (bot *Bot) RegisterEventHook(hook *EventHook) error {
 	name := hook.Name
 	if ex, exists := bot.eventHookMap[name]; exists {
@@ -309,6 +212,7 @@ func (bot *Bot) RegisterEventHook(hook *EventHook) error {
 	return nil
 }
 
+// RegisterService ...
 func (bot *Bot) RegisterService(srv *Service) error {
 	name := srv.Name
 	if ex, exists := bot.serviceMap[name]; exists {
@@ -345,11 +249,36 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 // Bot state
 //
 
+// GetState retrieves the state for given guild
 func (bot *Bot) GetState(guildID string) (state.Type, error) {
+	if bot.DisableBoltDatabase {
+		return state.MissingState, errors.New("bolt(key-value) database has been disabled in config struct")
+	}
 	return state.GetGuildState(guildID)
 }
+
+// SetState updates state for given guild
 func (bot *Bot) SetState(guildID string, st state.Type) error {
+	if bot.DisableBoltDatabase {
+		return errors.New("bolt(key-value) database has been disabled in config struct")
+	}
 	return state.SetGuildState(guildID, st)
+}
+
+// GetGuildValue returns a value from the bots key/value database
+func (bot *Bot) GetGuildValue(guildID, key string) ([]byte, error) {
+	if bot.DisableBoltDatabase {
+		return []byte(""), errors.New("bolt(key-value) database has been disabled in config struct")
+	}
+	return state.GetGuildValue(guildID, key)
+}
+
+// SetGuildValue updates/inserts a key-value into the given guild bucket
+func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
+	if bot.DisableBoltDatabase {
+		return errors.New("bolt(key-value) database has been disabled in config struct")
+	}
+	return state.SetGuildValue(guildID, key, val)
 }
 
 // Event listeners
@@ -367,7 +296,7 @@ func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 }
 
 func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
-
+	// NOTE! don't run if the config.DisableBoltDatabase is true
 	if event.Guild.Unavailable {
 		return
 	}
@@ -379,12 +308,12 @@ func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
 		// should this be handled? 0.o
 	}
 	if st == state.MissingState {
-
-		err := state.SetGuildState(guildID, state.DefaultState)
+		selectedState := defaultGuildState
+		err := state.SetGuildState(guildID, selectedState)
 		if err != nil {
 			logrus.Error("Unable to set default state for guild " + event.Guild.Name)
 		} else {
-			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(state.DefaultState) + "`")
+			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(selectedState) + "`")
 		}
 	} else {
 		logrus.Info("Checked Guild `" + event.Guild.Name + "`, with state `" + state.ToStr(st) + "`")
