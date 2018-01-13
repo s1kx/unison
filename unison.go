@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/s1kx/unison/constant"
+	"github.com/s1kx/unison/discord"
 	"github.com/s1kx/unison/state"
-	"github.com/s1kx/unison/unisonstruct"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
 )
@@ -114,11 +114,11 @@ func Run(settings *Config) error {
 
 // GetAuditLogs Get the last 50 audit logs for the given guild
 //	params interface{} is a struct with json tags that are converted into GET url parameters
-func GetAuditLogs(ctx *Context, guildID string, params interface{}) (*unisonstruct.AuditLog, error) {
+func GetAuditLogs(ctx *Context, guildID string, params interface{}) (*discord.AuditLog, error) {
 	urlParams := "" //convertAuditLogParamsToStr(params)
 	byteArr, err := ctx.Discord.Request("GET", discordgo.EndpointGuilds+guildID+"/audit-logs"+urlParams, nil)
 
-	auditLog := &unisonstruct.AuditLog{}
+	auditLog := &discord.AuditLog{}
 	err = json.Unmarshal(byteArr, &auditLog)
 	if err != nil {
 		return nil, err
