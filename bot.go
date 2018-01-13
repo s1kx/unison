@@ -290,7 +290,7 @@ func (bot *Bot) SendMessage(channel *discord.Channel, msg string) (*discord.Mess
 		return nil, err
 	}
 
-	return discord.NewMessageFromDiscordgo(discordgoMessage)
+	return discord.NewMessageFromDiscordgo(discordgoMessage), nil
 }
 
 // Event listeners
