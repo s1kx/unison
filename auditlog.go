@@ -87,7 +87,8 @@ type AuditLogParams struct {
 // }
 
 // GetAuditLogs Get the last 50 audit logs for the given guild
-func GetAuditLogs(ctx *Context, guildID string, params *AuditLogParams) (*AuditLog, error) {
+//	params interface{} is a struct with json tags that are converted into GET url parameters
+func GetAuditLogs(ctx *Context, guildID string, params interface{}) (*AuditLog, error) {
 	urlParams := "" //convertAuditLogParamsToStr(params)
 	byteArr, err := ctx.Discord.Request("GET", discordgo.EndpointGuilds+guildID+"/audit-logs"+urlParams, nil)
 
