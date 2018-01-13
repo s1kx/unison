@@ -2,8 +2,6 @@ package discord
 
 import (
 	"time"
-
-	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 type Guild struct {
@@ -16,9 +14,9 @@ type Guild struct {
 	OwnerID                     uint64         `json:"owner_id"`
 	JoinedAt                    time.Time      `json:"joined_at"`
 	Splash                      string         `json:"splash"`
-	AfkTimeout                  int            `json:"afk_timeout"`
+	AfkTimeout                  uint           `json:"afk_timeout"`
 	MemberCount                 uint           `json:"member_count"`
-	VerificationLevel           int            `json:"verification_level"`
+	VerificationLevel           uint8          `json:"verification_level"`
 	EmbedEnabled                bool           `json:"embed_enabled"`
 	Large                       bool           `json:"large"` // ??
 	DefaultMessageNotifications int            `json:"default_message_notifications"`
@@ -29,10 +27,4 @@ type Guild struct {
 	Channels                    []*Channel     `json:"channels"`
 	VoiceStates                 []*VoiceState  `json:"voice_states"`
 	Unavailable                 bool           `json:"unavailable"`
-}
-
-func NewGuildFromDiscordgo(guild *discordgo.Guild) *Guild {
-	return &Guild{
-		ID: discordIDStringToUint64(guild.ID),
-	}
 }

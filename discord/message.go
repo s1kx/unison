@@ -7,16 +7,19 @@ import (
 type Message struct {
 	ID              uint64        `json:"id"`
 	ChannelID       uint64        `json:"channel_id"`
+	Author          *User         `json:"author"`
 	Content         string        `json:"content"`
 	Timestamp       time.Time     `json:"timestamp"`
-	EditedTimestamp time.Time     `json:"edited_timestamp"`
-	MentionRoles    []uint64      `json:"mention_roles"`
+	EditedTimestamp time.Time     `json:"edited_timestamp"` // ?
 	Tts             bool          `json:"tts"`
 	MentionEveryone bool          `json:"mention_everyone"`
-	Author          *User         `json:"author"`
+	Mentions        []*User       `json:"mentions"`
+	MentionRoles    []uint64      `json:"mention_roles"`
 	Attachments     []*Attachment `json:"attachments"`
 	Embeds          []*Embed      `json:"embeds"`
-	Mentions        []*User       `json:"mentions"`
-	Reactions       []*Reaction   `json:"reactions"`
+	Reactions       []*Reaction   `json:"reactions"` // ?
+	Nonce           uint64        `json:"nonce"`     // ?, used for validating a message was sent
+	Pinned          bool          `json:"pinned"`
+	WebhookID       uint64        `json:"webhook_id"` // ?
 	Type            uint8         `json:"type"`
 }

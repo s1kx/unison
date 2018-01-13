@@ -2,8 +2,6 @@ package discord
 
 import (
 	"fmt"
-
-	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 type User struct {
@@ -20,20 +18,6 @@ type User struct {
 
 func NewUser() *User {
 	return &User{}
-}
-
-func NewUserFromDiscordgo(user *discordgo.User) *User {
-	return &User{
-		ID:            discordgoIDStringToUint64(user.ID),
-		Email:         user.Email,
-		Username:      user.Username,
-		Avatar:        user.Avatar,
-		Discriminator: user.Discriminator,
-		Token:         user.Token,
-		Verified:      user.Verified,
-		MFAEnabled:    user.MFAEnabled,
-		Bot:           user.Bot,
-	}
 }
 
 func (u *User) Mention() string {
