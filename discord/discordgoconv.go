@@ -231,11 +231,18 @@ func NewRoleFromDiscordgo(r *discordgo.Role) *Role {
 		Position:    r.Position,
 		Permissions: uint64(r.Permissions),
 	}
-	// TODO
 }
 
 func NewEmojiFromDiscordgo(e *discordgo.Emoji) *Emoji {
-	return &Emoji{}
+	return &Emoji{
+		ID:            discordgoIDStringToUint64(e.ID),
+		Name:          e.Name,
+		Roles:         discordgoIDStringArrayToUint64Array(e.Roles),
+		RequireColons: e.RequireColons,
+		Managed:       e.Managed,
+		// User: NewUserFromDiscordgo(e.User), // Not implemented by discordgo
+
+	}
 	// TODO
 }
 
