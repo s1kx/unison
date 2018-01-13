@@ -3,7 +3,7 @@ package unison
 import (
 	"sync"
 
-	"github.com/andersfylling/unison/events"
+	"github.com/s1kx/unison/events"
 	"github.com/sirupsen/logrus"
 )
 

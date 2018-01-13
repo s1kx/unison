@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/andersfylling/unison/state"
+	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
 
-	"github.com/andersfylling/unison/events"
+	"github.com/s1kx/unison/events"
 )
 
 // Bot is an active bot session.

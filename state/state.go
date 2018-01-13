@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/andersfylling/unison/constant"
 	"github.com/boltdb/bolt"
+	"github.com/s1kx/unison/constant"
 )
 
 // singleton pattern to handle a key value database for keeping track of bots current state relative to guild ID.

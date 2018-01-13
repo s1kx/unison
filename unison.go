@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/andersfylling/unison/constant"
-	"github.com/andersfylling/unison/state"
-	"github.com/andersfylling/unison/unisonstruct"
+	"github.com/s1kx/unison/constant"
+	"github.com/s1kx/unison/state"
+	"github.com/s1kx/unison/unisonstruct"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
 )
