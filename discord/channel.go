@@ -19,8 +19,12 @@ type Channel struct {
 	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites"`
 }
 
-func New() *Channel {
+func NewChannel() *Channel {
 	return &Channel{}
+}
+
+func (c *Channel) IDToStr() string {
+	return uint64ToString(c.ID)
 }
 
 func (c *Channel) Mention() string {
