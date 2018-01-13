@@ -221,7 +221,16 @@ func NewMessageFromDiscordgo(msg *discordgo.Message) *Message {
 }
 
 func NewRoleFromDiscordgo(r *discordgo.Role) *Role {
-	return &Role{}
+	return &Role{
+		ID:          discordgoIDStringToUint64(r.ID),
+		Name:        r.Name,
+		Managed:     r.Managed,
+		Mentionable: r.Mentionable,
+		Hoist:       r.Hoist,
+		Color:       r.Color,
+		Position:    r.Position,
+		Permissions: uint64(r.Permissions),
+	}
 	// TODO
 }
 
