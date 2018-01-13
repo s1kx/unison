@@ -241,14 +241,19 @@ func NewEmojiFromDiscordgo(e *discordgo.Emoji) *Emoji {
 		RequireColons: e.RequireColons,
 		Managed:       e.Managed,
 		// User: NewUserFromDiscordgo(e.User), // Not implemented by discordgo
-
 	}
-	// TODO
 }
 
 func NewGuildMemberFromDiscordgo(m *discordgo.Member) *GuildMember {
-	return &GuildMember{}
-	// TODO
+	return &GuildMember{
+		GuildID:  discordgoIDStringToUint64(m.GuildID),
+		JoinedAt: discordgoTimestampStringToTime(m.JoinedAt),
+		Nick:     m.Nick,
+		Deaf:     m.Deaf,
+		Mute:     m.Mute,
+		User:     NewUserFromDiscordgo(m.User),
+		Roles:    discordgoIDStringArrayToUint64Array(m.Roles),
+	}
 }
 
 func NewPresenceFromDiscordgo(p *discordgo.Presence) *Presence {
