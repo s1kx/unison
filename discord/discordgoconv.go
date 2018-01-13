@@ -124,6 +124,24 @@ func discordgoVoiceStatesToDiscordVoiceStates(vss []*discordgo.VoiceState) []*Vo
 	return voiceStates
 }
 
+func discordgoMessagesToDiscordMessages(ms []*discordgo.Message) []*Message {
+	messages := make([]*Message, 0, len(ms))
+	for i, m := range ms {
+		messages[i] = NewMessageFromDiscordgo(m)
+	}
+
+	return messages
+}
+
+func discordgoPermissionOverwritesToDiscordPermissionOverwrites(pms []*discordgo.PermissionOverwrite) []*PermissionOverwrite {
+	permissionOverwrites := make([]*PermissionOverwrite, 0, len(pms))
+	for i, pm := range pms {
+		permissionOverwrites[i] = NewPermissionOverwriteFromDiscordgo(pm)
+	}
+
+	return permissionOverwrites
+}
+
 func discordgoCopyTodiscordStruct(discordgoStruct interface{}, discordStruct interface{}) {
 	// TODO use reflection to copy over values with similar type and json tag.
 }
@@ -134,6 +152,10 @@ func discordgoMessageTypeToUint8(t discordgo.MessageType) uint8 {
 
 func discordgoVerificationLevelToUint8(vl discordgo.VerificationLevel) uint8 {
 	return uint8(vl)
+}
+
+func discordgoChannelTypeToUint8(ct discordgo.ChannelType) uint8 {
+	return uint8(ct)
 }
 
 func discordgoStatusToString(s discordgo.Status) string {
@@ -271,8 +293,20 @@ func NewPresenceFromDiscordgo(p *discordgo.Presence) *Presence {
 }
 
 func NewChannelFromDiscordgo(c *discordgo.Channel) *Channel {
-	return &Channel{}
-	// TODO
+	return &Channel{
+		ID:                   discordgoIDStringToUint64(c.ID),
+		GuildID:              discordgoIDStringToUint64(c.GuildID),
+		Name:                 c.Name,
+		Topic:                c.Topic,
+		Type:                 discordgoChannelTypeToUint8(c.Type),
+		LastMessageID:        discordgoIDStringToUint64(c.ID),
+		NSFW:                 c.NSFW,
+		Position:             uint(c.Position),
+		Bitrate:              c.Bitrate,
+		Recipients:           discordgoUserArrayTODiscordUserArray(c.Recipients),
+		Messages:             discordgoMessagesToDiscordMessages(c.Messages),
+		PermissionOverwrites: discordgoPermissionOverwritesToDiscordPermissionOverwrites(c.PermissionOverwrites),
+	}
 }
 
 func NewVoiceStateFromDiscordgo(vs *discordgo.VoiceState) *VoiceState {
@@ -287,4 +321,8 @@ func NewVoiceStateFromDiscordgo(vs *discordgo.VoiceState) *VoiceState {
 		Mute:      vs.Mute,
 		Deaf:      vs.Deaf,
 	}
+}
+
+func NewPermissionOverwriteFromDiscordgo(pm *discordgo.PermissionOverwrite) *PermissionOverwrite {
+	return &PermissionOverwrite{}
 }
