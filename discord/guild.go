@@ -7,15 +7,22 @@ import (
 )
 
 type Guild struct {
-	ID                          snowflake.ID   `json:"id"`
-	Name                        string         `json:"name"`
-	Icon                        string         `json:"icon"`
+	// Unique ID of the guild
+	ID snowflake.ID `json:"id"`
+	// Name of the guild
+	Name string `json:"name"`
+
+	// Icon is an image hash
+	Icon string `json:"icon"`
+	// Splash is an image hash
+	Splash string `json:"splash"`
+
+	// OwnerID is the unique user ID of the guild's owner
+	OwnerID                     snowflake.ID   `json:"owner_id"`
 	Region                      string         `json:"region"`
 	AfkChannelID                snowflake.ID   `json:"afk_channel_id"`
 	EmbedChannelID              snowflake.ID   `json:"embed_channel_id"`
-	OwnerID                     snowflake.ID   `json:"owner_id"`
 	JoinedAt                    time.Time      `json:"joined_at"`
-	Splash                      string         `json:"splash"`
 	AfkTimeout                  uint           `json:"afk_timeout"`
 	MemberCount                 uint           `json:"member_count"`
 	VerificationLevel           uint           `json:"verification_level"`

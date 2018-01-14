@@ -20,7 +20,7 @@ type AuditLogOption struct {
 }
 
 type AuditLogEntry struct {
-	TargetID   snowflake.ID      `json:"target_id"`
+	TargetID   *snowflake.ID     `json:"target_id"`
 	UserID     snowflake.ID      `json:"user_id"`
 	ID         snowflake.ID      `json:"id"`
 	ActionType uint              `json:"action_type"`
