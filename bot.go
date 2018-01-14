@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/s1kx/discordgo"
 	"github.com/s1kx/unison/discord"
 	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/bwmarrin/Discordgo.v0"
 
 	"github.com/s1kx/unison/events"
 )

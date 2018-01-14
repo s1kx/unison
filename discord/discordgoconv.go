@@ -3,8 +3,8 @@ package discord
 import (
 	"time"
 
+	"github.com/s1kx/discordgo"
 	"github.com/s1kx/unison/twitter/snowflake"
-	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
 const dgoTimestampLayout string = "2016-08-06T17:20:33.803-0400" // Needs checking

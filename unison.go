@@ -11,7 +11,7 @@ import (
 	"github.com/s1kx/unison/discord"
 	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/bwmarrin/Discordgo.v0"
+	"github.com/s1kx/discordgo"
 )
 
 var logFormatter = logrus.TextFormatter{
