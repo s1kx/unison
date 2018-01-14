@@ -1,11 +1,11 @@
 package discord
 
 type Presence struct {
-	User    *User     `json:"user"`
-	Roles   []uint64  `json:"roles"`
-	Game    *Activity `json:"activty"`
-	GuildID uint64    `json:"guild_id"`
-	Status  string    `json:"status"`
+	User    *User       `json:"user"`
+	Roles   []Snowflake `json:"roles"`
+	Game    *Activity   `json:"activty"`
+	GuildID Snowflake   `json:"guild_id"`
+	Status  string      `json:"status"`
 }
 
 func NewPresence() *Presence {

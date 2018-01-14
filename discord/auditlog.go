@@ -8,19 +8,19 @@ type AuditLogChange struct {
 }
 
 type AuditLogOption struct {
-	DeleteMemberDays string `json:"delete_member_days"`
-	MembersRemoved   string `json:"members_removed"`
-	ChannelID        uint64 `json:"channel_id"`
-	Count            string `json:"count"`
-	ID               uint64 `json:"id"`
-	Type             string `json:"type"` // type of overwritten entity ("member" or "role")
-	RoleName         string `json:"role_name"`
+	DeleteMemberDays string    `json:"delete_member_days"`
+	MembersRemoved   string    `json:"members_removed"`
+	ChannelID        Snowflake `json:"channel_id"`
+	Count            string    `json:"count"`
+	ID               Snowflake `json:"id"`
+	Type             string    `json:"type"` // type of overwritten entity ("member" or "role")
+	RoleName         string    `json:"role_name"`
 }
 
 type AuditLogEntry struct {
-	TargetID   uint64            `json:"target_id"`
-	UserID     uint64            `json:"user_id"`
-	ID         uint64            `json:"id"`
+	TargetID   Snowflake         `json:"target_id"`
+	UserID     Snowflake         `json:"user_id"`
+	ID         Snowflake         `json:"id"`
 	ActionType uint              `json:"action_type"`
 	Changes    []*AuditLogChange `json:"changes"`
 	Options    []*AuditLogOption `json:"options"`
@@ -35,10 +35,10 @@ type AuditLog struct {
 
 // AuditLogParams set params used in endpoint request
 type AuditLogParams struct {
-	UserID     uint64 `urlparam:"user_id,omitempty"`
-	ActionType uint   `urlparam:"action_type,omitempty"`
-	Before     uint64 `urlparam:"before,omitempty"`
-	Limit      int    `urlparam:"limit,omitempty"`
+	UserID     Snowflake `urlparam:"user_id,omitempty"`
+	ActionType uint      `urlparam:"action_type,omitempty"`
+	Before     Snowflake `urlparam:"before,omitempty"`
+	Limit      int       `urlparam:"limit,omitempty"`
 }
 
 //

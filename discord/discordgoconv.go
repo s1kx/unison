@@ -12,9 +12,9 @@ const dgoTimestampLayout string = "2016-08-06T17:20:33.803-0400" // Needs checki
 // Small purpose specific functionality
 //
 
-func dgoIDStringToUint64(id string) uint64 {
+func dgoIDToSnowflake(id string) Snowflake {
 	if id == "" {
-		return 0
+		return Snowflake(0)
 	}
 
 	u, err := strconv.ParseUint(id, 10, 64)
@@ -22,13 +22,13 @@ func dgoIDStringToUint64(id string) uint64 {
 		panic(err)
 	}
 
-	return u
+	return Snowflake(u)
 }
 
-func dgoIDStringsToUint64s(ids []string) []uint64 {
-	newIDS := make([]uint64, 0, len(ids))
+func dgoIDStringsToUint64s(ids []string) []Snowflake {
+	newIDS := make([]Snowflake, 0, len(ids))
 	for i, id := range ids {
-		newIDS[i] = dgoIDStringToUint64(id)
+		newIDS[i] = dgoIDToSnowflake(id)
 	}
 
 	return newIDS
@@ -167,7 +167,7 @@ func dgoStatusToString(s discordgo.Status) string {
 
 func NewUserFromDgo(user *discordgo.User) *User {
 	return &User{
-		ID:            dgoIDStringToUint64(user.ID),
+		ID:            dgoIDToSnowflake(user.ID),
 		Email:         user.Email,
 		Username:      user.Username,
 		Avatar:        user.Avatar,
@@ -200,13 +200,13 @@ func NewEmbedFromDgoEmbed(e *discordgo.MessageEmbed) *Embed {
 
 func NewGuildFromDgo(g *discordgo.Guild) *Guild {
 	return &Guild{
-		ID:                dgoIDStringToUint64(g.ID),
+		ID:                dgoIDToSnowflake(g.ID),
 		Name:              g.Name,
 		Icon:              g.Icon,
 		Region:            g.Region,
-		AfkChannelID:      dgoIDStringToUint64(g.AfkChannelID),
-		EmbedChannelID:    dgoIDStringToUint64(g.EmbedChannelID),
-		OwnerID:           dgoIDStringToUint64(g.OwnerID),
+		AfkChannelID:      dgoIDToSnowflake(g.AfkChannelID),
+		EmbedChannelID:    dgoIDToSnowflake(g.EmbedChannelID),
+		OwnerID:           dgoIDToSnowflake(g.OwnerID),
 		JoinedAt:          dgoTimestampToTime(g.JoinedAt),
 		Splash:            g.Splash,
 		AfkTimeout:        uint(g.AfkTimeout),
@@ -227,8 +227,8 @@ func NewGuildFromDgo(g *discordgo.Guild) *Guild {
 
 func NewMessageFromDgo(msg *discordgo.Message) *Message {
 	return &Message{
-		ID:              dgoIDStringToUint64(msg.ID),
-		ChannelID:       dgoIDStringToUint64(msg.ChannelID),
+		ID:              dgoIDToSnowflake(msg.ID),
+		ChannelID:       dgoIDToSnowflake(msg.ChannelID),
 		Content:         msg.Content,
 		Timestamp:       dgoTimestampToTime(msg.Timestamp),
 		Tts:             msg.Tts,
@@ -248,7 +248,7 @@ func NewMessageFromDgo(msg *discordgo.Message) *Message {
 
 func NewRoleFromDgo(r *discordgo.Role) *Role {
 	return &Role{
-		ID:          dgoIDStringToUint64(r.ID),
+		ID:          dgoIDToSnowflake(r.ID),
 		Name:        r.Name,
 		Managed:     r.Managed,
 		Mentionable: r.Mentionable,
@@ -261,7 +261,7 @@ func NewRoleFromDgo(r *discordgo.Role) *Role {
 
 func NewEmojiFromDgo(e *discordgo.Emoji) *Emoji {
 	return &Emoji{
-		ID:            dgoIDStringToUint64(e.ID),
+		ID:            dgoIDToSnowflake(e.ID),
 		Name:          e.Name,
 		Roles:         dgoIDStringsToUint64s(e.Roles),
 		RequireColons: e.RequireColons,
@@ -272,7 +272,7 @@ func NewEmojiFromDgo(e *discordgo.Emoji) *Emoji {
 
 func NewGuildMemberFromDgo(m *discordgo.Member) *GuildMember {
 	return &GuildMember{
-		GuildID:  dgoIDStringToUint64(m.GuildID),
+		GuildID:  dgoIDToSnowflake(m.GuildID),
 		JoinedAt: dgoTimestampStringToTime(m.JoinedAt),
 		Nick:     m.Nick,
 		Deaf:     m.Deaf,
@@ -294,12 +294,12 @@ func NewPresenceFromDgo(p *discordgo.Presence) *Presence {
 
 func NewChannelFromDgo(c *discordgo.Channel) *Channel {
 	return &Channel{
-		ID:                   dgoIDStringToUint64(c.ID),
-		GuildID:              dgoIDStringToUint64(c.GuildID),
+		ID:                   dgoIDToSnowflake(c.ID),
+		GuildID:              dgoIDToSnowflake(c.GuildID),
 		Name:                 c.Name,
 		Topic:                c.Topic,
 		Type:                 dgoChannelTypeToUint(c.Type),
-		LastMessageID:        dgoIDStringToUint64(c.ID),
+		LastMessageID:        dgoIDToSnowflake(c.ID),
 		NSFW:                 c.NSFW,
 		Position:             uint(c.Position),
 		Bitrate:              c.Bitrate,
@@ -311,10 +311,10 @@ func NewChannelFromDgo(c *discordgo.Channel) *Channel {
 
 func NewVoiceStateFromDgo(vs *discordgo.VoiceState) *VoiceState {
 	return &VoiceState{
-		UserID:    dgoIDStringToUint64(vs.UserID),
-		SessionID: dgoIDStringToUint64(vs.SessionID),
-		ChannelID: dgoIDStringToUint64(vs.ChannelID),
-		GuildID:   dgoIDStringToUint64(vs.GuildID),
+		UserID:    dgoIDToSnowflake(vs.UserID),
+		SessionID: dgoIDToSnowflake(vs.SessionID),
+		ChannelID: dgoIDToSnowflake(vs.ChannelID),
+		GuildID:   dgoIDToSnowflake(vs.GuildID),
 		Suppress:  vs.Suppress,
 		SelfMute:  vs.SelfMute,
 		SelfDeaf:  vs.SelfDeaf,
@@ -325,7 +325,7 @@ func NewVoiceStateFromDgo(vs *discordgo.VoiceState) *VoiceState {
 
 func NewPermissionOverwriteFromDgo(pm *discordgo.PermissionOverwrite) *PermissionOverwrite {
 	return &PermissionOverwrite{
-		ID:    dgoIDStringToUint64(pm.ID),
+		ID:    dgoIDToSnowflake(pm.ID),
 		Type:  pm.Type,
 		Deny:  pm.Deny,
 		Allow: pm.Allow,
@@ -334,7 +334,7 @@ func NewPermissionOverwriteFromDgo(pm *discordgo.PermissionOverwrite) *Permissio
 
 func NewAttachmentFromDgo(a *discordgo.MessageAttachment) *Attachment {
 	return &Attachment{
-		ID:       dgoIDStringToUint64(a.ID),
+		ID:       dgoIDToSnowflake(a.ID),
 		Filename: a.Filename,
 		Size:     uint(a.Size),
 		URL:      a.URL,

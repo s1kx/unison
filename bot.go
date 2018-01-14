@@ -285,7 +285,7 @@ func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
 // SendMessage sends a string message to a given channel
 func (bot *Bot) SendMessage(channel *discord.Channel, msg string) (*discord.Message, error) {
 	// TODO maybe add this a discord.Channel method, but need to store discord session when creating object
-	discordgoMessage, err := bot.Discord.ChannelMessageSend(channel.IDToStr(), msg)
+	discordgoMessage, err := bot.Discord.ChannelMessageSend(channel.ID.String(), msg)
 	if err != nil {
 		return nil, err
 	}

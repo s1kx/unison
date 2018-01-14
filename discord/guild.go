@@ -5,13 +5,13 @@ import (
 )
 
 type Guild struct {
-	ID                          uint64         `json:"id"`
+	ID                          Snowflake      `json:"id"`
 	Name                        string         `json:"name"`
 	Icon                        string         `json:"icon"`
 	Region                      string         `json:"region"`
-	AfkChannelID                uint64         `json:"afk_channel_id"`
-	EmbedChannelID              uint64         `json:"embed_channel_id"`
-	OwnerID                     uint64         `json:"owner_id"`
+	AfkChannelID                Snowflake      `json:"afk_channel_id"`
+	EmbedChannelID              Snowflake      `json:"embed_channel_id"`
+	OwnerID                     Snowflake      `json:"owner_id"`
 	JoinedAt                    time.Time      `json:"joined_at"`
 	Splash                      string         `json:"splash"`
 	AfkTimeout                  uint           `json:"afk_timeout"`
