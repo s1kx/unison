@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"gopkg.in/bwmarrin/Discordgo.v0"
+	"github.com/s1kx/discordgo"
 )
 
 func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {

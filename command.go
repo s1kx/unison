@@ -9,7 +9,7 @@ import (
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/s1kx/unison/constant"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/bwmarrin/Discordgo.v0"
+	"github.com/s1kx/discordgo"
 )
 
 type CommandInterface interface {

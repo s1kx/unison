@@ -3,7 +3,7 @@ package events
 import (
 	"fmt"
 
-	"gopkg.in/bwmarrin/Discordgo.v0"
+	"github.com/s1kx/discordgo"
 )
 
 type InvalidEventTypeError struct {
