@@ -6,7 +6,7 @@ This is all the code required to create a bot that has no commands, hooks, servi
 package main
 
 import (
-    "github.com/andersfylling/unison"
+    "github.com/s1kx/unison"
     "github.com/sirupsen/logrus"
 )
 

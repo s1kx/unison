@@ -1,6 +1,8 @@
 package discord
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type User struct {
 	ID            uint64 `json:"id"`

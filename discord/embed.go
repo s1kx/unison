@@ -1,6 +1,8 @@
 package discord
 
-import "time"
+import (
+	"time"
+)
 
 type Embed struct {
 	Title       string          `json:"title"`       // title of embed

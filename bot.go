@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/s1kx/unison/discord"
 	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/bwmarrin/Discordgo.v0"
@@ -279,6 +280,17 @@ func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
 		return errors.New("bolt(key-value) database has been disabled in config struct")
 	}
 	return state.SetGuildValue(guildID, key, val)
+}
+
+// SendMessage sends a string message to a given channel
+func (bot *Bot) SendMessage(channel *discord.Channel, msg string) (*discord.Message, error) {
+	// TODO maybe add this a discord.Channel method, but need to store discord session when creating object
+	discordgoMessage, err := bot.Discord.ChannelMessageSend(channel.IDToStr(), msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return discord.NewMessageFromDgo(discordgoMessage), nil
 }
 
 // Event listeners
