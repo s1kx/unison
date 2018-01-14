@@ -2,16 +2,18 @@ package discord
 
 import (
 	"time"
+
+	"github.com/s1kx/unison/twitter/snowflake"
 )
 
 type Guild struct {
-	ID                          Snowflake      `json:"id"`
+	ID                          snowflake.ID   `json:"id"`
 	Name                        string         `json:"name"`
 	Icon                        string         `json:"icon"`
 	Region                      string         `json:"region"`
-	AfkChannelID                Snowflake      `json:"afk_channel_id"`
-	EmbedChannelID              Snowflake      `json:"embed_channel_id"`
-	OwnerID                     Snowflake      `json:"owner_id"`
+	AfkChannelID                snowflake.ID   `json:"afk_channel_id"`
+	EmbedChannelID              snowflake.ID   `json:"embed_channel_id"`
+	OwnerID                     snowflake.ID   `json:"owner_id"`
 	JoinedAt                    time.Time      `json:"joined_at"`
 	Splash                      string         `json:"splash"`
 	AfkTimeout                  uint           `json:"afk_timeout"`

@@ -1,5 +1,7 @@
 package discord
 
+import "github.com/s1kx/unison/twitter/snowflake"
+
 type AuditLogChange struct {
 	// will this even work? TODO, NOTE
 	NewValue interface{} `json:"new_value"`
@@ -8,19 +10,19 @@ type AuditLogChange struct {
 }
 
 type AuditLogOption struct {
-	DeleteMemberDays string    `json:"delete_member_days"`
-	MembersRemoved   string    `json:"members_removed"`
-	ChannelID        Snowflake `json:"channel_id"`
-	Count            string    `json:"count"`
-	ID               Snowflake `json:"id"`
-	Type             string    `json:"type"` // type of overwritten entity ("member" or "role")
-	RoleName         string    `json:"role_name"`
+	DeleteMemberDays string       `json:"delete_member_days"`
+	MembersRemoved   string       `json:"members_removed"`
+	ChannelID        snowflake.ID `json:"channel_id"`
+	Count            string       `json:"count"`
+	ID               snowflake.ID `json:"id"`
+	Type             string       `json:"type"` // type of overwritten entity ("member" or "role")
+	RoleName         string       `json:"role_name"`
 }
 
 type AuditLogEntry struct {
-	TargetID   Snowflake         `json:"target_id"`
-	UserID     Snowflake         `json:"user_id"`
-	ID         Snowflake         `json:"id"`
+	TargetID   snowflake.ID      `json:"target_id"`
+	UserID     snowflake.ID      `json:"user_id"`
+	ID         snowflake.ID      `json:"id"`
 	ActionType uint              `json:"action_type"`
 	Changes    []*AuditLogChange `json:"changes"`
 	Options    []*AuditLogOption `json:"options"`
@@ -35,10 +37,10 @@ type AuditLog struct {
 
 // AuditLogParams set params used in endpoint request
 type AuditLogParams struct {
-	UserID     Snowflake `urlparam:"user_id,omitempty"`
-	ActionType uint      `urlparam:"action_type,omitempty"`
-	Before     Snowflake `urlparam:"before,omitempty"`
-	Limit      int       `urlparam:"limit,omitempty"`
+	UserID     snowflake.ID `urlparam:"user_id,omitempty"`
+	ActionType uint         `urlparam:"action_type,omitempty"`
+	Before     snowflake.ID `urlparam:"before,omitempty"`
+	Limit      int          `urlparam:"limit,omitempty"`
 }
 
 //

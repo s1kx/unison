@@ -2,18 +2,20 @@ package discord
 
 import (
 	"fmt"
+
+	"github.com/s1kx/unison/twitter/snowflake"
 )
 
 type User struct {
-	ID            Snowflake `json:"id"`
-	Email         string    `json:"email"`
-	Username      string    `json:"username"`
-	Avatar        string    `json:"avatar"`
-	Discriminator string    `json:"discriminator"`
-	Token         string    `json:"token"`
-	Verified      bool      `json:"verified"`
-	MFAEnabled    bool      `json:"mfa_enabled"`
-	Bot           bool      `json:"bot"`
+	ID            snowflake.ID `json:"id"`
+	Email         string       `json:"email"`
+	Username      string       `json:"username"`
+	Avatar        string       `json:"avatar"`
+	Discriminator string       `json:"discriminator"`
+	Token         string       `json:"token"`
+	Verified      bool         `json:"verified"`
+	MFAEnabled    bool         `json:"mfa_enabled"`
+	Bot           bool         `json:"bot"`
 }
 
 func NewUser() *User {

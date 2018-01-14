@@ -1,11 +1,13 @@
 package discord
 
+import "github.com/s1kx/unison/twitter/snowflake"
+
 type Presence struct {
-	User    *User       `json:"user"`
-	Roles   []Snowflake `json:"roles"`
-	Game    *Activity   `json:"activty"`
-	GuildID Snowflake   `json:"guild_id"`
-	Status  string      `json:"status"`
+	User    *User          `json:"user"`
+	Roles   []snowflake.ID `json:"roles"`
+	Game    *Activity      `json:"activty"`
+	GuildID snowflake.ID   `json:"guild_id"`
+	Status  string         `json:"status"`
 }
 
 func NewPresence() *Presence {

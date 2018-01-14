@@ -1,13 +1,15 @@
 package discord
 
+import "github.com/s1kx/unison/twitter/snowflake"
+
 type VoiceState struct {
-	UserID    Snowflake `json:"user_id"`
-	SessionID Snowflake `json:"session_id"`
-	ChannelID Snowflake `json:"channel_id"`
-	GuildID   Snowflake `json:"guild_id"`
-	Suppress  bool      `json:"suppress"`
-	SelfMute  bool      `json:"self_mute"`
-	SelfDeaf  bool      `json:"self_deaf"`
-	Mute      bool      `json:"mute"`
-	Deaf      bool      `json:"deaf"`
+	UserID    snowflake.ID `json:"user_id"`
+	SessionID snowflake.ID `json:"session_id"`
+	ChannelID snowflake.ID `json:"channel_id"`
+	GuildID   snowflake.ID `json:"guild_id"`
+	Suppress  bool         `json:"suppress"`
+	SelfMute  bool         `json:"self_mute"`
+	SelfDeaf  bool         `json:"self_deaf"`
+	Mute      bool         `json:"mute"`
+	Deaf      bool         `json:"deaf"`
 }

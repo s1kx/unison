@@ -2,15 +2,17 @@ package discord
 
 import (
 	"fmt"
+
+	"github.com/s1kx/unison/twitter/snowflake"
 )
 
 type Channel struct {
-	ID                   Snowflake              `json:"id"`
-	GuildID              Snowflake              `json:"guild_id"`
+	ID                   snowflake.ID           `json:"id"`
+	GuildID              snowflake.ID           `json:"guild_id"`
 	Name                 string                 `json:"name"`
 	Topic                string                 `json:"topic"`
 	Type                 uint                   `json:"type"`
-	LastMessageID        Snowflake              `json:"last_message_id"`
+	LastMessageID        snowflake.ID           `json:"last_message_id"`
 	NSFW                 bool                   `json:"nsfw"`
 	Position             uint                   `json:"position"`
 	Bitrate              int                    `json:"bitrate"`
@@ -28,8 +30,8 @@ func (c *Channel) Mention() string {
 }
 
 type PermissionOverwrite struct {
-	ID    Snowflake `json:"id"`    // role or user id
-	Type  string    `json:"type"`  // either `role` or `member`
-	Deny  int       `json:"deny"`  // permission bit set
-	Allow int       `json:"allow"` // permission bit set
+	ID    snowflake.ID `json:"id"`    // role or user id
+	Type  string       `json:"type"`  // either `role` or `member`
+	Deny  int          `json:"deny"`  // permission bit set
+	Allow int          `json:"allow"` // permission bit set
 }
