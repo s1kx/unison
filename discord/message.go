@@ -21,5 +21,5 @@ type Message struct {
 	Nonce           uint64        `json:"nonce"`     // ?, used for validating a message was sent
 	Pinned          bool          `json:"pinned"`
 	WebhookID       uint64        `json:"webhook_id"` // ?
-	Type            uint8         `json:"type"`
+	Type            uint          `json:"type"`
 }

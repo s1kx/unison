@@ -7,12 +7,12 @@ import (
 	"gopkg.in/bwmarrin/Discordgo.v0"
 )
 
-const discordgoTimestampLayout string = "2016-08-06T17:20:33.803-0400"
+const dgoTimestampLayout string = "2016-08-06T17:20:33.803-0400" // Needs checking
 
 // Small purpose specific functionality
 //
 
-func discordgoIDStringToUint64(id string) uint64 {
+func dgoIDStringToUint64(id string) uint64 {
 	if id == "" {
 		return 0
 	}
@@ -25,10 +25,10 @@ func discordgoIDStringToUint64(id string) uint64 {
 	return u
 }
 
-func discordgoIDStringArrayToUint64Array(ids []string) []uint64 {
+func dgoIDStringsToUint64s(ids []string) []uint64 {
 	newIDS := make([]uint64, 0, len(ids))
 	for i, id := range ids {
-		newIDS[i] = discordgoIDStringToUint64(id)
+		newIDS[i] = dgoIDStringToUint64(id)
 	}
 
 	return newIDS
@@ -38,21 +38,21 @@ func uint64ToString(id uint64) string {
 	return strconv.FormatUint(id, 10)
 }
 
-func discordgoAttachmentArrayToDiscordAttachmentArray(as []*discordgo.MessageAttachment) []*Attachment {
+func dgoAttachmentsToDiscordAttachments(as []*discordgo.MessageAttachment) []*Attachment {
 	attachments := make([]*Attachment, 0, len(as))
 	for i, a := range as {
-		attachments[i] = NewAttachmentFromDiscordgo(a)
+		attachments[i] = NewAttachmentFromDgo(a)
 	}
 
 	return attachments
 }
 
-func discordgoTimestampToTime(ts discordgo.Timestamp) time.Time {
-	return discordgoTimestampStringToTime(string(ts))
+func dgoTimestampToTime(ts discordgo.Timestamp) time.Time {
+	return dgoTimestampStringToTime(string(ts))
 }
 
-func discordgoTimestampStringToTime(ts string) time.Time {
-	timestamp, err := time.Parse(discordgoTimestampLayout, ts)
+func dgoTimestampStringToTime(ts string) time.Time {
+	timestamp, err := time.Parse(dgoTimestampLayout, ts)
 	if err != nil {
 		panic(err)
 		//return time.Now() // this is so bad..
@@ -61,113 +61,113 @@ func discordgoTimestampStringToTime(ts string) time.Time {
 	return timestamp
 }
 
-func discordgoUserArrayTODiscordUserArray(users []*discordgo.User) []*User {
+func dgoUsersTODiscordUsers(users []*discordgo.User) []*User {
 	discordUsers := make([]*User, 0, len(users))
 	for i, user := range users {
-		discordUsers[i] = NewUserFromDiscordgo(user)
+		discordUsers[i] = NewUserFromDgo(user)
 	}
 
 	return discordUsers
 }
 
-func discordgoRolesToDiscordRoles(rs []*discordgo.Role) []*Role {
+func dgoRolesToDiscordRoles(rs []*discordgo.Role) []*Role {
 	roles := make([]*Role, 0, len(rs))
 	for i, r := range rs {
-		roles[i] = NewRoleFromDiscordgo(r)
+		roles[i] = NewRoleFromDgo(r)
 	}
 
 	return roles
 }
 
-func discordgoEmojisToDiscordEmojis(es []*discordgo.Emoji) []*Emoji {
+func dgoEmojisToDiscordEmojis(es []*discordgo.Emoji) []*Emoji {
 	emojis := make([]*Emoji, 0, len(es))
 	for i, e := range es {
-		emojis[i] = NewEmojiFromDiscordgo(e)
+		emojis[i] = NewEmojiFromDgo(e)
 	}
 
 	return emojis
 }
 
-func discordgoGuildMembersToDiscordGuildMembers(ms []*discordgo.Member) []*GuildMember {
+func dgoGuildMembersToDiscordGuildMembers(ms []*discordgo.Member) []*GuildMember {
 	guildMembers := make([]*GuildMember, 0, len(ms))
 	for i, m := range ms {
-		guildMembers[i] = NewGuildMemberFromDiscordgo(m)
+		guildMembers[i] = NewGuildMemberFromDgo(m)
 	}
 
 	return guildMembers
 }
 
-func discordgoPresencesToDiscordPresences(ps []*discordgo.Presence) []*Presence {
+func dgoPresencesToDiscordPresences(ps []*discordgo.Presence) []*Presence {
 	presences := make([]*Presence, 0, len(ps))
 	for i, p := range ps {
-		presences[i] = NewPresenceFromDiscordgo(p)
+		presences[i] = NewPresenceFromDgo(p)
 	}
 
 	return presences
 }
 
-func discordgoChannelsToDiscordChannels(cs []*discordgo.Channel) []*Channel {
+func dgoChannelsToDiscordChannels(cs []*discordgo.Channel) []*Channel {
 	channels := make([]*Channel, 0, len(cs))
 	for i, c := range cs {
-		channels[i] = NewChannelFromDiscordgo(c)
+		channels[i] = NewChannelFromDgo(c)
 	}
 
 	return channels
 }
 
-func discordgoVoiceStatesToDiscordVoiceStates(vss []*discordgo.VoiceState) []*VoiceState {
+func dgoVoiceStatesToDiscordVoiceStates(vss []*discordgo.VoiceState) []*VoiceState {
 	voiceStates := make([]*VoiceState, 0, len(vss))
 	for i, vs := range vss {
-		voiceStates[i] = NewVoiceStateFromDiscordgo(vs)
+		voiceStates[i] = NewVoiceStateFromDgo(vs)
 	}
 
 	return voiceStates
 }
 
-func discordgoMessagesToDiscordMessages(ms []*discordgo.Message) []*Message {
+func dgoMessagesToDiscordMessages(ms []*discordgo.Message) []*Message {
 	messages := make([]*Message, 0, len(ms))
 	for i, m := range ms {
-		messages[i] = NewMessageFromDiscordgo(m)
+		messages[i] = NewMessageFromDgo(m)
 	}
 
 	return messages
 }
 
-func discordgoPermissionOverwritesToDiscordPermissionOverwrites(pms []*discordgo.PermissionOverwrite) []*PermissionOverwrite {
+func dgoPermissionOverwritesToDiscordPermissionOverwrites(pms []*discordgo.PermissionOverwrite) []*PermissionOverwrite {
 	permissionOverwrites := make([]*PermissionOverwrite, 0, len(pms))
 	for i, pm := range pms {
-		permissionOverwrites[i] = NewPermissionOverwriteFromDiscordgo(pm)
+		permissionOverwrites[i] = NewPermissionOverwriteFromDgo(pm)
 	}
 
 	return permissionOverwrites
 }
 
-func discordgoCopyTodiscordStruct(discordgoStruct interface{}, discordStruct interface{}) {
+func dgoCopyTodiscordStruct(discordgoStruct interface{}, discordStruct interface{}) {
 	// TODO use reflection to copy over values with similar type and json tag.
 }
 
-func discordgoMessageTypeToUint8(t discordgo.MessageType) uint8 {
-	return uint8(t)
+func dgoMessageTypeToUint(t discordgo.MessageType) uint {
+	return uint(t)
 }
 
-func discordgoVerificationLevelToUint8(vl discordgo.VerificationLevel) uint8 {
-	return uint8(vl)
+func dgoVerificationLevelToUint(vl discordgo.VerificationLevel) uint {
+	return uint(vl)
 }
 
-func discordgoChannelTypeToUint8(ct discordgo.ChannelType) uint8 {
-	return uint8(ct)
+func dgoChannelTypeToUint(ct discordgo.ChannelType) uint {
+	return uint(ct)
 }
 
-func discordgoStatusToString(s discordgo.Status) string {
+func dgoStatusToString(s discordgo.Status) string {
 	return string(s)
 }
 
 // Struct converters
 //
 
-func NewUserFromDiscordgo(user *discordgo.User) *User {
+func NewUserFromDgo(user *discordgo.User) *User {
 	return &User{
-		ID:            discordgoIDStringToUint64(user.ID),
+		ID:            dgoIDStringToUint64(user.ID),
 		Email:         user.Email,
 		Username:      user.Username,
 		Avatar:        user.Avatar,
@@ -179,13 +179,13 @@ func NewUserFromDiscordgo(user *discordgo.User) *User {
 	}
 }
 
-func NewEmbedFromDiscordgoEmbed(e *discordgo.MessageEmbed) *Embed {
+func NewEmbedFromDgoEmbed(e *discordgo.MessageEmbed) *Embed {
 	return &Embed{
 		Title:       e.Title,
 		Type:        e.Type,
 		Description: e.Description,
 		URL:         e.URL,
-		Timestamp:   discordgoTimestampStringToTime(e.Timestamp),
+		Timestamp:   dgoTimestampStringToTime(e.Timestamp),
 		Color:       e.Color,
 		// Footer: NewEmbedFooterFromDiscordgo(e.Footer),
 		// Image: NewEmbedImageFromDiscordgo(e.Image),
@@ -193,62 +193,62 @@ func NewEmbedFromDiscordgoEmbed(e *discordgo.MessageEmbed) *Embed {
 		// Video: NewEmbedVideoFromDiscordgo(e.Video),
 		// Provider: NewEmbedProviderFromDiscordgo(e.Provider),
 		// Author: NewEmbedAuthorFromDiscordgo(e.Author),
-		// Fields: discordgoFieldArrayToDiscordEmbedFieldArray(e.Fields),
+		// Fields: dgoFieldArrayToDiscordEmbedFieldArray(e.Fields),
 	}
 	// TODO
 }
 
-func NewGuildFromDiscordgo(g *discordgo.Guild) *Guild {
+func NewGuildFromDgo(g *discordgo.Guild) *Guild {
 	return &Guild{
-		ID:                discordgoIDStringToUint64(g.ID),
+		ID:                dgoIDStringToUint64(g.ID),
 		Name:              g.Name,
 		Icon:              g.Icon,
 		Region:            g.Region,
-		AfkChannelID:      discordgoIDStringToUint64(g.AfkChannelID),
-		EmbedChannelID:    discordgoIDStringToUint64(g.EmbedChannelID),
-		OwnerID:           discordgoIDStringToUint64(g.OwnerID),
-		JoinedAt:          discordgoTimestampToTime(g.JoinedAt),
+		AfkChannelID:      dgoIDStringToUint64(g.AfkChannelID),
+		EmbedChannelID:    dgoIDStringToUint64(g.EmbedChannelID),
+		OwnerID:           dgoIDStringToUint64(g.OwnerID),
+		JoinedAt:          dgoTimestampToTime(g.JoinedAt),
 		Splash:            g.Splash,
 		AfkTimeout:        uint(g.AfkTimeout),
 		MemberCount:       uint(g.MemberCount),
-		VerificationLevel: discordgoVerificationLevelToUint8(g.VerificationLevel),
+		VerificationLevel: dgoVerificationLevelToUint(g.VerificationLevel),
 		EmbedEnabled:      g.EmbedEnabled,
 		Large:             g.Large,
 		DefaultMessageNotifications: g.DefaultMessageNotifications, // TODO: review type
-		Roles:       discordgoRolesToDiscordRoles(g.Roles),
-		Emojis:      discordgoEmojisToDiscordEmojis(g.Emojis),
-		Members:     discordgoGuildMembersToDiscordGuildMembers(g.Members),
-		Presences:   discordgoPresencesToDiscordPresences(g.Presences),
-		Channels:    discordgoChannelsToDiscordChannels(g.Channels),
-		VoiceStates: discordgoVoiceStatesToDiscordVoiceStates(g.VoiceStates),
+		Roles:       dgoRolesToDiscordRoles(g.Roles),
+		Emojis:      dgoEmojisToDiscordEmojis(g.Emojis),
+		Members:     dgoGuildMembersToDiscordGuildMembers(g.Members),
+		Presences:   dgoPresencesToDiscordPresences(g.Presences),
+		Channels:    dgoChannelsToDiscordChannels(g.Channels),
+		VoiceStates: dgoVoiceStatesToDiscordVoiceStates(g.VoiceStates),
 		Unavailable: g.Unavailable,
 	}
 }
 
-func NewMessageFromDiscordgo(msg *discordgo.Message) *Message {
+func NewMessageFromDgo(msg *discordgo.Message) *Message {
 	return &Message{
-		ID:              discordgoIDStringToUint64(msg.ID),
-		ChannelID:       discordgoIDStringToUint64(msg.ChannelID),
+		ID:              dgoIDStringToUint64(msg.ID),
+		ChannelID:       dgoIDStringToUint64(msg.ChannelID),
 		Content:         msg.Content,
-		Timestamp:       discordgoTimestampToTime(msg.Timestamp),
+		Timestamp:       dgoTimestampToTime(msg.Timestamp),
 		Tts:             msg.Tts,
 		MentionEveryone: msg.MentionEveryone,
-		Mentions:        discordgoUserArrayTODiscordUserArray(msg.Mentions),
-		MentionRoles:    discordgoIDStringArrayToUint64Array(msg.MentionRoles),
-		Attachments:     discordgoAttachmentArrayToDiscordAttachmentArray(msg.Attachments),
-		// Embeds: discordgoMessageEmbedsToDiscordEmbeds(msg.Embeds),
-		// Reactions: discordgoReactionsToDiscordReactions(msg.Reactions),
-		// Nonce: discordgoIDStringToUint64(msg.Nonce),
+		Mentions:        dgoUsersTODiscordUsers(msg.Mentions),
+		MentionRoles:    dgoIDStringsToUint64s(msg.MentionRoles),
+		Attachments:     dgoAttachmentsToDiscordAttachments(msg.Attachments),
+		// Embeds: dgoMessageEmbedsToDiscordEmbeds(msg.Embeds),
+		// Reactions: dgoReactionsToDiscordReactions(msg.Reactions),
+		// Nonce: dgoIDStringToUint64(msg.Nonce),
 		// Pinned: msg.Pinned, // not implemented by discordgo..
-		// WebhookID: discordgoIDStringToUint64(msg.WebhookID), // Not implemented by discordgo...
-		Type: discordgoMessageTypeToUint8(msg.Type),
+		// WebhookID: dgoIDStringToUint64(msg.WebhookID), // Not implemented by discordgo...
+		Type: dgoMessageTypeToUint(msg.Type),
 	}
 	// TODO
 }
 
-func NewRoleFromDiscordgo(r *discordgo.Role) *Role {
+func NewRoleFromDgo(r *discordgo.Role) *Role {
 	return &Role{
-		ID:          discordgoIDStringToUint64(r.ID),
+		ID:          dgoIDStringToUint64(r.ID),
 		Name:        r.Name,
 		Managed:     r.Managed,
 		Mentionable: r.Mentionable,
@@ -259,62 +259,62 @@ func NewRoleFromDiscordgo(r *discordgo.Role) *Role {
 	}
 }
 
-func NewEmojiFromDiscordgo(e *discordgo.Emoji) *Emoji {
+func NewEmojiFromDgo(e *discordgo.Emoji) *Emoji {
 	return &Emoji{
-		ID:            discordgoIDStringToUint64(e.ID),
+		ID:            dgoIDStringToUint64(e.ID),
 		Name:          e.Name,
-		Roles:         discordgoIDStringArrayToUint64Array(e.Roles),
+		Roles:         dgoIDStringsToUint64s(e.Roles),
 		RequireColons: e.RequireColons,
 		Managed:       e.Managed,
 		// User: NewUserFromDiscordgo(e.User), // Not implemented by discordgo
 	}
 }
 
-func NewGuildMemberFromDiscordgo(m *discordgo.Member) *GuildMember {
+func NewGuildMemberFromDgo(m *discordgo.Member) *GuildMember {
 	return &GuildMember{
-		GuildID:  discordgoIDStringToUint64(m.GuildID),
-		JoinedAt: discordgoTimestampStringToTime(m.JoinedAt),
+		GuildID:  dgoIDStringToUint64(m.GuildID),
+		JoinedAt: dgoTimestampStringToTime(m.JoinedAt),
 		Nick:     m.Nick,
 		Deaf:     m.Deaf,
 		Mute:     m.Mute,
-		User:     NewUserFromDiscordgo(m.User),
-		Roles:    discordgoIDStringArrayToUint64Array(m.Roles),
+		User:     NewUserFromDgo(m.User),
+		Roles:    dgoIDStringsToUint64s(m.Roles),
 	}
 }
 
-func NewPresenceFromDiscordgo(p *discordgo.Presence) *Presence {
+func NewPresenceFromDgo(p *discordgo.Presence) *Presence {
 	return &Presence{
-		User:  NewUserFromDiscordgo(p.User),
-		Roles: discordgoIDStringArrayToUint64Array(p.Roles),
+		User:  NewUserFromDgo(p.User),
+		Roles: dgoIDStringsToUint64s(p.Roles),
 		// Game: NewActivityFromDiscordgo(p.Activity), // not implemented by discordgo...
-		// GuildID: discordgoIDStringToUint64(p.GuildID), // not implemented by discordgo..
-		Status: discordgoStatusToString(p.Status),
+		// GuildID: dgoIDStringToUint64(p.GuildID), // not implemented by discordgo..
+		Status: dgoStatusToString(p.Status),
 	}
 }
 
-func NewChannelFromDiscordgo(c *discordgo.Channel) *Channel {
+func NewChannelFromDgo(c *discordgo.Channel) *Channel {
 	return &Channel{
-		ID:                   discordgoIDStringToUint64(c.ID),
-		GuildID:              discordgoIDStringToUint64(c.GuildID),
+		ID:                   dgoIDStringToUint64(c.ID),
+		GuildID:              dgoIDStringToUint64(c.GuildID),
 		Name:                 c.Name,
 		Topic:                c.Topic,
-		Type:                 discordgoChannelTypeToUint8(c.Type),
-		LastMessageID:        discordgoIDStringToUint64(c.ID),
+		Type:                 dgoChannelTypeToUint(c.Type),
+		LastMessageID:        dgoIDStringToUint64(c.ID),
 		NSFW:                 c.NSFW,
 		Position:             uint(c.Position),
 		Bitrate:              c.Bitrate,
-		Recipients:           discordgoUserArrayTODiscordUserArray(c.Recipients),
-		Messages:             discordgoMessagesToDiscordMessages(c.Messages),
-		PermissionOverwrites: discordgoPermissionOverwritesToDiscordPermissionOverwrites(c.PermissionOverwrites),
+		Recipients:           dgoUsersTODiscordUsers(c.Recipients),
+		Messages:             dgoMessagesToDiscordMessages(c.Messages),
+		PermissionOverwrites: dgoPermissionOverwritesToDiscordPermissionOverwrites(c.PermissionOverwrites),
 	}
 }
 
-func NewVoiceStateFromDiscordgo(vs *discordgo.VoiceState) *VoiceState {
+func NewVoiceStateFromDgo(vs *discordgo.VoiceState) *VoiceState {
 	return &VoiceState{
-		UserID:    discordgoIDStringToUint64(vs.UserID),
-		SessionID: discordgoIDStringToUint64(vs.SessionID),
-		ChannelID: discordgoIDStringToUint64(vs.ChannelID),
-		GuildID:   discordgoIDStringToUint64(vs.GuildID),
+		UserID:    dgoIDStringToUint64(vs.UserID),
+		SessionID: dgoIDStringToUint64(vs.SessionID),
+		ChannelID: dgoIDStringToUint64(vs.ChannelID),
+		GuildID:   dgoIDStringToUint64(vs.GuildID),
 		Suppress:  vs.Suppress,
 		SelfMute:  vs.SelfMute,
 		SelfDeaf:  vs.SelfDeaf,
@@ -323,11 +323,23 @@ func NewVoiceStateFromDiscordgo(vs *discordgo.VoiceState) *VoiceState {
 	}
 }
 
-func NewPermissionOverwriteFromDiscordgo(pm *discordgo.PermissionOverwrite) *PermissionOverwrite {
+func NewPermissionOverwriteFromDgo(pm *discordgo.PermissionOverwrite) *PermissionOverwrite {
 	return &PermissionOverwrite{
-		ID:    discordgoIDStringToUint64(pm.ID),
+		ID:    dgoIDStringToUint64(pm.ID),
 		Type:  pm.Type,
 		Deny:  pm.Deny,
 		Allow: pm.Allow,
+	}
+}
+
+func NewAttachmentFromDgo(a *discordgo.MessageAttachment) *Attachment {
+	return &Attachment{
+		ID:       dgoIDStringToUint64(a.ID),
+		Filename: a.Filename,
+		Size:     uint(a.Size),
+		URL:      a.URL,
+		ProxyURL: a.ProxyURL,
+		Height:   uint(a.Height),
+		Width:    uint(a.Width),
 	}
 }

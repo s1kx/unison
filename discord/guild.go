@@ -16,7 +16,7 @@ type Guild struct {
 	Splash                      string         `json:"splash"`
 	AfkTimeout                  uint           `json:"afk_timeout"`
 	MemberCount                 uint           `json:"member_count"`
-	VerificationLevel           uint8          `json:"verification_level"`
+	VerificationLevel           uint           `json:"verification_level"`
 	EmbedEnabled                bool           `json:"embed_enabled"`
 	Large                       bool           `json:"large"` // ??
 	DefaultMessageNotifications int            `json:"default_message_notifications"`

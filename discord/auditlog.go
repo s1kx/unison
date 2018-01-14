@@ -21,7 +21,7 @@ type AuditLogEntry struct {
 	TargetID   uint64            `json:"target_id"`
 	UserID     uint64            `json:"user_id"`
 	ID         uint64            `json:"id"`
-	ActionType uint8             `json:"action_type"`
+	ActionType uint              `json:"action_type"`
 	Changes    []*AuditLogChange `json:"changes"`
 	Options    []*AuditLogOption `json:"options"`
 	Reason     string            `json:"reason"`
@@ -36,7 +36,7 @@ type AuditLog struct {
 // AuditLogParams set params used in endpoint request
 type AuditLogParams struct {
 	UserID     uint64 `urlparam:"user_id,omitempty"`
-	ActionType uint8  `urlparam:"action_type,omitempty"`
+	ActionType uint   `urlparam:"action_type,omitempty"`
 	Before     uint64 `urlparam:"before,omitempty"`
 	Limit      int    `urlparam:"limit,omitempty"`
 }

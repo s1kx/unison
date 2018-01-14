@@ -9,7 +9,7 @@ type Channel struct {
 	GuildID              uint64                 `json:"guild_id"`
 	Name                 string                 `json:"name"`
 	Topic                string                 `json:"topic"`
-	Type                 uint8                  `json:"type"`
+	Type                 uint                   `json:"type"`
 	LastMessageID        uint64                 `json:"last_message_id"`
 	NSFW                 bool                   `json:"nsfw"`
 	Position             uint                   `json:"position"`
