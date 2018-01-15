@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+
 	arg "github.com/alexflint/go-arg"
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/s1kx/discordgo"
 	"github.com/s1kx/unison/constant"
-	"github.com/sirupsen/logrus"
 )
 
 var (
-	ErrSubcommandDepthExceeded = fmt.Errorf("Too many recursive sub commands. Max depth is %d", constant.SubCommandDepthLimit)
+	ErrSubcommandDepthExceeded = fmt.Errorf("subcommand depth limit reached (max: %d)", constant.SubCommandDepthLimit)
 	ErrNoCommandFlags          = errors.New("No flags have been added")
 )
 
@@ -164,6 +165,26 @@ func (cmd *Command) invoke(ctx *Context, msg *discordgo.Message, request string)
 	if err != nil {
 		logrus.Errorf("Command [%s]: %s", cmd.Name, err)
 	}
+}
+
+// DuplicateCommandError command error
+type DuplicateCommandError struct {
+	Existing *Command
+	New      *Command
+	Name     string
+}
+
+func (e DuplicateCommandError) Error() string {
+	return fmt.Sprintf("commands: name/alias '%s' already exists", e.Name)
+}
+
+// InvalidCommandPrefixError
+type InvalidCommandPrefixError struct {
+	Prefix string
+}
+
+func (e InvalidCommandPrefixError) Error() string {
+	return fmt.Sprintf("invalid command prefix `%s`", e.Prefix)
 }
 
 // ########################

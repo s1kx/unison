@@ -1,10 +1,12 @@
-package unison
+package session
 
 import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+
 	"github.com/s1kx/discordgo"
+	"github.com/s1kx/unison/state"
 )
 
 func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
@@ -70,36 +72,27 @@ func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
 	}
 }
 
-// Check if a message content string is a valid command by it's prefix "!" or bot mention
-func identifiesAsCommand(content, prefix string) (status bool, updatedContent string) {
-	if strings.HasPrefix(content, prefix) {
-		// remove duplicate command prefixes
-		result := removePrefix(content, prefix)
-		for {
-			if !strings.HasPrefix(result, prefix) {
-				break
-			} else {
-				result = removePrefix(result, prefix)
-			}
-		}
-
-		// make sure there is content after removing the command prefix
-		if len(result) > 0 {
-			return true, result
-		}
-		return false, result
+func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
+	// NOTE! don't run if the config.DisableBoltDatabase is true
+	if event.Guild.Unavailable {
+		return
 	}
 
-	return false, content
-}
-
-// Removes a substring from the string and cleans up leading & trailing spaces.
-func removePrefix(str, remove string) string {
-	result := strings.TrimPrefix(str, remove)
-	result = strings.TrimSpace(result)
-
-	if str[0] == ' ' {
-		return result[1:len(result)]
+	// Add this guild to the database
+	guildID := event.Guild.ID
+	st, err := state.GetGuildState(guildID)
+	if err != nil {
+		// should this be handled? 0.o
 	}
-	return result
+	if st == state.MissingState {
+		selectedState := defaultGuildState
+		err := state.SetGuildState(guildID, selectedState)
+		if err != nil {
+			logrus.Error("Unable to set default state for guild " + event.Guild.Name)
+		} else {
+			logrus.Infof("Joined Guild `%s`, and set state to `%s`", event.Guild.Name, state.ToStr(selectedState))
+		}
+	} else {
+		logrus.Infof("Checked Guild `%s`, with state `%s`", event.Guild.Name, state.ToStr(st))
+	}
 }

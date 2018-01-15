@@ -1,17 +1,18 @@
 package unison
 
 import (
-	"encoding/json"
 	"errors"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/s1kx/discordgo"
-	"github.com/s1kx/unison/constant"
-	"github.com/s1kx/unison/discord"
-	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
+
+	"github.com/s1kx/discordgo"
+
+	"github.com/s1kx/unison/constant"
+	"github.com/s1kx/unison/session"
+	"github.com/s1kx/unison/state"
 )
 
 var logFormatter = logrus.TextFormatter{
@@ -23,14 +24,14 @@ var (
 	ErrMissingDiscordToken = errors.New("discord token is not configured")
 )
 
-// Run start the bot. Connect to discord, setup commands, hooks and services.
-func Run(settings *Config) error {
+// Run is a convenience function for starting a session with the given Bot and coniguration.
+func Run(bot *Bot, conf *Config) error {
 	// Configure logger format.
 	logrus.SetFormatter(&logFormatter)
 
 	// add a underscore suffix to environment prefix
-	if settings.EnvironmentPrefix != "" {
-		settings.EnvironmentPrefix = settings.EnvironmentPrefix + "_"
+	if conf.EnvironmentPrefix != "" {
+		conf.EnvironmentPrefix = conf.EnvironmentPrefix + "_"
 	}
 
 	// TODO: Validate commands
@@ -43,10 +44,10 @@ func Run(settings *Config) error {
 
 	// 1. Make sure the discord token exists.
 	//
-	token := settings.Token
+	token := conf.Token
 	// if it was not specified in the Settings struct, check the environment variable
 	if token == "" {
-		token = os.Getenv(settings.EnvironmentPrefix + constant.EnvUnisonDiscordToken)
+		token = os.Getenv(conf.EnvironmentPrefix + constant.EnvUnisonDiscordToken)
 
 		// if the env var was empty as well, crash the bot as this is required.
 		if token == "" {
@@ -68,26 +69,26 @@ func Run(settings *Config) error {
 
 	// 2. Set a prefered way of triggering commands
 	//
-	envPrefix := os.Getenv(settings.EnvironmentPrefix + constant.EnvUnisonCommandPrefix)
+	envPrefix := os.Getenv(conf.EnvironmentPrefix + constant.EnvUnisonCommandPrefix)
 	if envPrefix != "" {
-		settings.CommandPrefix = append(settings.CommandPrefix, envPrefix)
+		conf.CommandPrefix = append(conf.CommandPrefix, envPrefix)
 	}
 	var cmdPrefixes string
-	for _, prefix := range settings.CommandPrefix {
+	for _, prefix := range conf.CommandPrefix {
 		cmdPrefixes += "; " + prefix
 	}
-	if !settings.DisableMentionTrigger {
+	if !conf.DisableMentionTrigger {
 		cmdPrefixes += "; And by @mention."
 	}
 	logrus.Info("Commands are triggered by" + cmdPrefixes)
 
 	// 3. Decide the bot state.
 	//
-	uState := settings.BotState
+	uState := conf.BotState
 	// check if valid state
 	if uState == state.MissingState {
-		// chjeck environment variable
-		uStateStr := os.Getenv(settings.EnvironmentPrefix + constant.EnvUnisonState)
+		// check environment variable
+		uStateStr := os.Getenv(conf.EnvironmentPrefix + constant.EnvUnisonState)
 
 		if uStateStr == "" {
 			uState = state.Normal // uint8(1)
@@ -105,31 +106,13 @@ func Run(settings *Config) error {
 			}
 		}
 	}
-	settings.BotState = uState
+	conf.BotState = uState
 
 	// Initialize and start bot
-	bot, err := newBot(settings, ds)
+	s, err := session.New(bot, conf, ds)
 	if err != nil {
 		return err
 	}
 
-	return bot.Run() // returns nil on successfull shutdown
-}
-
-// GetAuditLogs Get the last 50 audit logs for the given guild
-//	params interface{} is a struct with json tags that are converted into GET url parameters
-func GetAuditLogs(ctx *Context, guildID string, params interface{}) (*discord.AuditLog, error) {
-	urlParams := "" //convertAuditLogParamsToStr(params)
-	byteArr, err := ctx.Discord.Request("GET", discordgo.EndpointGuilds+guildID+"/audit-logs"+urlParams, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	auditLog := &discord.AuditLog{}
-	err = json.Unmarshal(byteArr, &auditLog)
-	if err != nil {
-		return nil, err
-	}
-
-	return auditLog, nil
+	return s.Run() // returns nil on successfull shutdown
 }

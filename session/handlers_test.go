@@ -1,4 +1,4 @@
-package unison
+package session
 
 import "testing"
 
