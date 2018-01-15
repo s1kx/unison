@@ -7,17 +7,21 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/s1kx/discordgo"
 	"github.com/s1kx/unison/constant"
 	"github.com/s1kx/unison/discord"
 	"github.com/s1kx/unison/state"
 	"github.com/sirupsen/logrus"
-	"github.com/s1kx/discordgo"
 )
 
 var logFormatter = logrus.TextFormatter{
 	FullTimestamp:   true,
 	TimestampFormat: "2006-01-02 15:04:05",
 }
+
+var (
+	ErrMissingDiscordToken = errors.New("discord token is not configured")
+)
 
 // Run start the bot. Connect to discord, setup commands, hooks and services.
 func Run(settings *Config) error {
@@ -46,7 +50,7 @@ func Run(settings *Config) error {
 
 		// if the env var was empty as well, crash the bot as this is required.
 		if token == "" {
-			return errors.New("Missing env var " + settings.EnvironmentPrefix + constant.EnvUnisonDiscordToken + ". This is required. Specify in either Settings struct or env var.")
+			return ErrMissingDiscordToken
 		}
 
 		logrus.Info("Using bot token from environment variable.")
@@ -117,6 +121,9 @@ func Run(settings *Config) error {
 func GetAuditLogs(ctx *Context, guildID string, params interface{}) (*discord.AuditLog, error) {
 	urlParams := "" //convertAuditLogParamsToStr(params)
 	byteArr, err := ctx.Discord.Request("GET", discordgo.EndpointGuilds+guildID+"/audit-logs"+urlParams, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	auditLog := &discord.AuditLog{}
 	err = json.Unmarshal(byteArr, &auditLog)

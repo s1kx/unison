@@ -7,9 +7,14 @@ import (
 
 	arg "github.com/alexflint/go-arg"
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/s1kx/discordgo"
 	"github.com/s1kx/unison/constant"
 	"github.com/sirupsen/logrus"
-	"github.com/s1kx/discordgo"
+)
+
+var (
+	ErrSubcommandDepthExceeded = fmt.Errorf("Too many recursive sub commands. Max depth is %d", constant.SubCommandDepthLimit)
+	ErrNoCommandFlags          = errors.New("No flags have been added")
 )
 
 type CommandInterface interface {
@@ -113,10 +118,8 @@ func (cmd *Command) createParser(dests ...interface{}) error {
 
 // insistSubCommandDepth Make sure there aren't infinite depth of sub commands
 func (cmd *Command) insistSubCommandDepth(depth int) error {
-
 	if depth <= 0 && len(cmd.SubCommands) > 0 {
-		errMsg := fmt.Sprintf("Too many recursive sub commands. Max depth is %d", constant.SubCommandDepthLimit)
-		return errors.New(errMsg)
+		return ErrSubcommandDepthExceeded
 	}
 
 	for _, c := range cmd.SubCommands {
@@ -136,7 +139,7 @@ func (cmd *Command) invokableWithPermissions(permissions *DiscordPermissions) bo
 
 func (cmd *Command) parseInput(input string) error {
 	if cmd.Flags == nil {
-		return errors.New("No flags have been added")
+		return ErrNoCommandFlags
 	}
 
 	args, err := shellquote.Split(input)

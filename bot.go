@@ -15,6 +15,10 @@ import (
 	"github.com/s1kx/unison/events"
 )
 
+var (
+	ErrDatabaseDisabled = errors.New("bolt(key-value) database has been disabled in config struct")
+)
+
 // Bot is an active bot session.
 type Bot struct {
 	*Config
@@ -253,7 +257,7 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 // GetState retrieves the state for given guild
 func (bot *Bot) GetState(guildID string) (state.Type, error) {
 	if bot.DisableBoltDatabase {
-		return state.MissingState, errors.New("bolt(key-value) database has been disabled in config struct")
+		return state.MissingState, ErrDatabaseDisabled
 	}
 	return state.GetGuildState(guildID)
 }
@@ -261,7 +265,7 @@ func (bot *Bot) GetState(guildID string) (state.Type, error) {
 // SetState updates state for given guild
 func (bot *Bot) SetState(guildID string, st state.Type) error {
 	if bot.DisableBoltDatabase {
-		return errors.New("bolt(key-value) database has been disabled in config struct")
+		return ErrDatabaseDisabled
 	}
 	return state.SetGuildState(guildID, st)
 }
@@ -269,7 +273,7 @@ func (bot *Bot) SetState(guildID string, st state.Type) error {
 // GetGuildValue returns a value from the bots key/value database
 func (bot *Bot) GetGuildValue(guildID, key string) ([]byte, error) {
 	if bot.DisableBoltDatabase {
-		return []byte(""), errors.New("bolt(key-value) database has been disabled in config struct")
+		return nil, ErrDatabaseDisabled
 	}
 	return state.GetGuildValue(guildID, key)
 }
@@ -277,7 +281,7 @@ func (bot *Bot) GetGuildValue(guildID, key string) ([]byte, error) {
 // SetGuildValue updates/inserts a key-value into the given guild bucket
 func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
 	if bot.DisableBoltDatabase {
-		return errors.New("bolt(key-value) database has been disabled in config struct")
+		return ErrDatabaseDisabled
 	}
 	return state.SetGuildValue(guildID, key, val)
 }
@@ -325,9 +329,9 @@ func onGuildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {
 		if err != nil {
 			logrus.Error("Unable to set default state for guild " + event.Guild.Name)
 		} else {
-			logrus.Info("Joined Guild `" + event.Guild.Name + "`, and set state to `" + state.ToStr(selectedState) + "`")
+			logrus.Infof("Joined Guild `%s`, and set state to `%s`", event.Guild.Name, state.ToStr(selectedState))
 		}
 	} else {
-		logrus.Info("Checked Guild `" + event.Guild.Name + "`, with state `" + state.ToStr(st) + "`")
+		logrus.Infof("Checked Guild `%s`, with state `%s`", event.Guild.Name, state.ToStr(st))
 	}
 }

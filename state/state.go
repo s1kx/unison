@@ -10,9 +10,21 @@ import (
 	"github.com/s1kx/unison/constant"
 )
 
+// DatabaseError acts as an adapter for bolt errors.
+type DatabaseError error
+
+// BucketError adds context to a transaction error.
+type BucketError struct {
+	Bucket string
+	DatabaseError
+}
+
+func (e BucketError) Error() string {
+	return fmt.Sprintf("bucket `%s`: %s", e.Bucket, e.DatabaseError)
+}
+
 // singleton pattern to handle a key value database for keeping track of bots current state relative to guild ID.
 // https://github.com/boltdb/bolt
-
 type singleton struct {
 	db *bolt.DB
 }
@@ -57,7 +69,7 @@ func GetGuildValue(bucket, key string) ([]byte, error) {
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		if b == nil {
-			return fmt.Errorf("Bucket " + bucket + " not found!")
+			return &BucketError{bucket, bolt.ErrBucketNotFound}
 		}
 
 		val = b.Get([]byte(key))
@@ -75,20 +87,21 @@ func SetGuildValue(bucket, key string, val []byte) error {
 		return err
 	}
 
-	err = db.Update(func(tx *bolt.Tx) error {
-		b, e := tx.CreateBucketIfNotExists([]byte(bucket))
-		if e != nil {
-			return fmt.Errorf("create bucket: %s", e)
+	if err := db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
+		if err != nil {
+			return &BucketError{bucket, err}
 		}
 		return b.Put([]byte(key), val)
-	})
+	}); err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
 // GetGuildState returns the state of guild
 func GetGuildState(guildID string /*discordgo uses strings for ID...*/) (Type, error) {
-
 	val, err := GetGuildValue(guildID, constant.StateKey)
 	if err != nil {
 		return 0, err
