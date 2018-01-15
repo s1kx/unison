@@ -21,17 +21,16 @@ func pingCommandAction(ctx *unison.Context, m *discordgo.Message, request string
   return err
 }
 
-// Register the command struct instance
-// See stupidBot.md for main func
-...
-    settings := &unison.Config{
+// Build example configuration with ping command
+func buildConfig() *unison.Config {
+   return &unison.Config{
         Commands:   []*unison.Command{
           PingCommand,                     // Add ping command
         },
         EventHooks: []*unison.EventHook{}, // No hooks added
         Services:   []*unison.Service{},   // No services added
     }
-...
+}
 ```
 
 The bot then replies with `pong` whenever the command `ping` is issued: `@botname ping` => `replies with pong`.
@@ -53,7 +52,6 @@ var PingHook = &unison.EventHook{
 }
 
 func pingHookAction(ctx *unison.Context, event *events.DiscordEvent, self bool) (handled bool, err error) {
-
   var m *discordgo.Message
 
   // Make sure it's a new message
@@ -85,17 +83,16 @@ func pingHookAction(ctx *unison.Context, event *events.DiscordEvent, self bool) 
   return true, err
 }
 
-// Register the hook struct instance
-// See stupidBot.md for main func
-...
-    settings := &unison.Config{
+// Build example configuration with ping hook
+func buildConfig() *unison.Config {
+    return &unison.Config{
         Commands:   []*unison.Command{},    // No commands added
         EventHooks: []*unison.EventHook{
           PingHook,
         },
         Services:   []*unison.Service{},    // No services added
     }
-...
+}
 ```
 
 Note that we don't use hooks if the user/member is directly requesting a response. Hooks are more useful to react to certain events taking place as these can be anything. Say you wan't to create a database record whenever you join a new guild. This is where you would be forced to use a hook as there is "no" other way.
