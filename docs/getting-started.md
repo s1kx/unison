@@ -3,32 +3,22 @@
 This is all the code required to create a bot that has no commands, hooks, services. And reads its configuration from environment variables (discord bot token, command prefix, etc.).
 
 ```go
-package main
+settings := &unison.Config{
+  Commands:   []*unison.Command{},   // No commands added
+  EventHooks: []*unison.EventHook{}, // No hooks added
+  Services:   []*unison.Service{},   // No services added
+}
 
-import (
-    "github.com/s1kx/unison"
-    "github.com/sirupsen/logrus"
-)
-
-func main() {
-    settings := &unison.Config{
-        Commands:   []*unison.Command{},   // No commands added
-        EventHooks: []*unison.EventHook{}, // No hooks added
-        Services:   []*unison.Service{},   // No services added
-    }
-
-    // Start the bot
-    err := unison.Run(settings)
-    if err != nil {
-        logrus.Error(err)
-    }
+// Start the bot
+err := unison.Run(settings)
+if err != nil {
+  return err
 }
 ```
 
-Terminal output of running built code:
+Example output:
 
-```go
-$ ./stupidbot
+```
 INFO[2018-01-05 17:25:37] Using bot token from environment variable.
 INFO[2018-01-05 17:25:37] Commands are triggered by; And by @mention.
 INFO[2018-01-05 17:25:37] Opening WS connection to Discord ..
@@ -43,7 +33,7 @@ The application list its interaction configuation and notes when the connection 
 
 The bot also uses graceful shutdown by listening to interupt signals.
 
-```go
+```
 ^C
 INFO[2018-01-05 17:28:00] Shutting down bot..
 INFO[2018-01-05 17:28:00]       Closing WS discord connection ..
@@ -53,15 +43,13 @@ INFO[2018-01-05 17:28:01] Shutdown successfully
 
 Remember the discord bot token is added using `export UNISON_DISCORD_TOKEN="kdsfjskfhgk4wh8h"` in this example. If the token is not exported you get a warning.
 
-```go
-$ ./stupidbot
+```
 ERRO[2018-01-05 17:22:23] Missing env var UNISON_DISCORD_TOKEN. This is required. Specify in either Settings struct or env var.
 ```
 
 If the discord token is incorrect the output will give an error and say authentication failed.
 
 ```go
-./stupidbot
 INFO[2018-01-05 17:28:35] Using bot token from environment variable.
 INFO[2018-01-05 17:28:35] Commands are triggered by; And by @mention.
 INFO[2018-01-05 17:28:35] Opening WS connection to Discord ..
