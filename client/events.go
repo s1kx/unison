@@ -1,27 +1,28 @@
-package session
+package client
 
 import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/s1kx/unison/events"
+	"github.com/s1kx/unison"
+	"github.com/s1kx/unison/discord/events"
 )
 
-type eventDispatcher struct {
+type dispatcher struct {
 	mu             sync.RWMutex
-	hookMap        map[string]*EventHook
-	typeToHooksMap map[events.EventType]map[string]*EventHook
+	hookMap        map[string]*unison.EventHook
+	typeToHooksMap map[events.EventType]map[string]*unison.EventHook
 }
 
-func newEventDispatcher() *eventDispatcher {
-	return &eventDispatcher{
+func newEventDispatcher() *dispatcher {
+	return &dispatcher{
 		hookMap:        make(map[string]*EventHook),
 		typeToHooksMap: make(map[events.EventType]map[string]*EventHook),
 	}
 }
 
-func (d *eventDispatcher) GetHooks() map[string]*EventHook {
+func (d *dispatcher) GetHooks() map[string]*unison.EventHook {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
@@ -34,7 +35,7 @@ func (d *eventDispatcher) GetHooks() map[string]*EventHook {
 	return nm
 }
 
-func (d *eventDispatcher) AddHook(hook *EventHook) error {
+func (d *dispatcher) AddHook(hook *unison.EventHook) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
@@ -61,7 +62,7 @@ func (d *eventDispatcher) AddHook(hook *EventHook) error {
 	return nil
 }
 
-func (d *eventDispatcher) Dispatch(ctx *Context, event *events.DiscordEvent, self bool) error {
+func (d *dispatcher) DispatchEvent(ctx *unison.Context, event *events.DiscordEvent, self bool) error {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 

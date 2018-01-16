@@ -1,6 +1,6 @@
 package discord
 
-import "github.com/s1kx/unison/twitter/snowflake"
+import "github.com/s1kx/unison/discord/snowflake"
 
 type Attachment struct {
 	ID       snowflake.ID `json:"id"`

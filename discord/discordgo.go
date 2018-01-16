@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/s1kx/discordgo"
-	"github.com/s1kx/unison/twitter/snowflake"
+	"github.com/s1kx/unison/discord/snowflake"
 )
 
 const dgoTimestampLayout string = "2016-08-06T17:20:33.803-0400" // Needs checking

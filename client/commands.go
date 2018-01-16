@@ -1,10 +1,12 @@
-package session
+package client
 
 import (
 	"strings"
+
+	"github.com/s1kx/unison"
 )
 
-type commandRegistry map[string]*Command
+type commandRegistry map[string]*unison.Command
 
 // Check if a message content string is a valid command by it's prefix "!" or bot mention
 func identifiesAsCommand(content, prefix string) (status bool, updatedContent string) {

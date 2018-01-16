@@ -1,6 +1,6 @@
 package discord
 
-import "github.com/s1kx/unison/twitter/snowflake"
+import "github.com/s1kx/unison/discord/snowflake"
 
 type VoiceState struct {
 	UserID    snowflake.ID `json:"user_id"`

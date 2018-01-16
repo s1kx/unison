@@ -1,13 +1,17 @@
-package session
+package client
 
-import "fmt"
+import (
+	"fmt"
 
-type serviceRegistry map[string]*Service
+	"github.com/s1kx/unison"
+)
+
+type serviceRegistry map[string]*unison.Service
 
 // DuplicateServiceError service error
 type DuplicateServiceError struct {
-	Existing *Service
-	New      *Service
+	Existing *unison.Service
+	New      *unison.Service
 	Name     string
 }
 

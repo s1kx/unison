@@ -1,4 +1,4 @@
-package session
+package client
 
 import (
 	"fmt"
@@ -11,16 +11,16 @@ import (
 	"github.com/s1kx/discordgo"
 	"github.com/s1kx/unison"
 	"github.com/s1kx/unison/discord"
-	"github.com/s1kx/unison/events"
+	"github.com/s1kx/unison/discord/events"
 	"github.com/s1kx/unison/state"
 )
 
 // Session is an active bot session.
-type Session struct {
+type Client struct {
 	bot    *unison.Bot
 	config *unison.Config
 
-	discord *discordgo.Session
+	session *discordgo.Session
 
 	// name/alias => command
 	commands commandRegistry
@@ -29,7 +29,7 @@ type Session struct {
 	// name => service
 	services serviceRegistry
 
-	dispatcher *eventDispatcher
+	dispatcher *dispatcher
 
 	// Command prefixes
 	commandPrefix []string
@@ -40,25 +40,27 @@ type Session struct {
 	state state.Type // default bot state
 }
 
-func (s Session) Discord() *discordgo.Session {
-	return s.discord
+func (s Client) Session() *discordgo.Session {
+	return s.session
 }
 
 // This is awful and needs to be handled. It's used in "onGuildJoin" func
 var defaultGuildState state.Type
 
-func New(bot *unison.Bot, conf *unison.Config, ds *discordgo.Session) (*Session, error) {
+func NewClient(bot *unison.Bot, conf *unison.Config, session *discordgo.Session) (*Client, error) {
 	cmdPrefixes := make([]string, len(conf.CommandPrefixes))
 	copy(cmdPrefixes, conf.CommandPrefixes)
 
-	// Initialize basic session
-	bot := &Session{
-		Config:  conf,
-		Discord: ds,
+	// Initialize basic client
+	cl := &Client{
+		bot:    bot,
+		config: conf,
 
-		commands: make(map[string]*Command),
-		hooks:    make(map[string]*EventHook),
-		services: make(map[string]*Service),
+		session: session,
+
+		commands: make(map[string]*unison.Command),
+		hooks:    make(map[string]*unison.EventHook),
+		services: make(map[string]*unison.Service),
 
 		dispatcher: newEventDispatcher(),
 
@@ -67,7 +69,7 @@ func New(bot *unison.Bot, conf *unison.Config, ds *discordgo.Session) (*Session,
 
 	// Register commands
 	for _, cmd := range bot.Commands {
-		err := bot.RegisterCommand(cmd)
+		err := cl.RegisterCommand(cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +77,7 @@ func New(bot *unison.Bot, conf *unison.Config, ds *discordgo.Session) (*Session,
 
 	// Register event hooks
 	for _, hook := range bot.EventHooks {
-		err := bot.RegisterEventHook(hook)
+		err := cl.RegisterEventHook(hook)
 		if err != nil {
 			return nil, err
 		}
@@ -83,18 +85,18 @@ func New(bot *unison.Bot, conf *unison.Config, ds *discordgo.Session) (*Session,
 
 	// Register services
 	for _, srv := range bot.Services {
-		err := bot.RegisterService(srv)
+		err := cl.RegisterService(srv)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return bot, nil
+	return cl, nil
 }
 
 // GetServiceData a data value from existing services
-func (bot *Bot) GetServiceData(srvName string, key string) string {
-	if val, ok := bot.serviceMap[srvName]; ok {
+func (cl *Client) GetServiceData(srvName string, key string) string {
+	if val, ok := cl.services[srvName]; ok {
 		if d, s := val.Data[key]; s {
 			// key exist
 			return d
@@ -105,10 +107,10 @@ func (bot *Bot) GetServiceData(srvName string, key string) string {
 }
 
 // SetServiceData update or set a new value for a given service key
-func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
-	if v, ok := bot.serviceMap[srvName]; ok {
+func (cl *Client) SetServiceData(srvName string, key string, val string) string {
+	if v, ok := cl.services[srvName]; ok {
 		if _, s := v.Data[key]; s {
-			bot.serviceMap[srvName].Data[key] = val
+			cl.services[srvName].Data[key] = val
 
 			return val
 		}
@@ -118,41 +120,41 @@ func (bot *Bot) SetServiceData(srvName string, key string, val string) string {
 }
 
 // Run Start the bot instance
-func (bot *Bot) Run() error {
+func (cl *Client) Run() error {
 	// Add handler to wait for ready state in order to initialize the bot fully.
-	bot.Discord.AddHandler(bot.onReady)
+	cl.session.AddHandler(cl.onReady)
 
 	// Add generic handler for event hooks
 	// Add command handler
-	bot.Discord.AddHandler(func(ds *discordgo.Session, event interface{}) {
-		bot.onEvent(ds, event)
+	cl.session.AddHandler(func(ds *discordgo.Session, event interface{}) {
+		cl.onEvent(ds, event)
 	})
 
 	// Handle joining new guilds
-	if !bot.DisableBoltDatabase {
-		defaultGuildState = bot.BotState /// ugh...
-		bot.Discord.AddHandler(onGuildJoin)
+	if !cl.DisableBoltDatabase {
+		defaultGuildState = cl.BotState /// ugh...
+		cl.Discord.AddHandler(onGuildJoin)
 	}
 
 	// Open the websocket and begin listening.
 	logrus.Info("Opening WS connection to Discord .. ")
-	err := bot.Discord.Open()
+	err := cl.session.Open()
 	if err != nil {
 		return fmt.Errorf("error: %s", err)
 	}
 	logrus.Info("OK")
 
 	// add trigger by mention unless disabled in config
-	if !bot.Config.DisableMentionTrigger {
-		bot.commandPrefix = append(bot.commandPrefix, bot.Discord.State.User.Mention())
-		bot.Config.CommandPrefix = bot.commandPrefix
+	if !cl.Config.DisableMentionTrigger {
+		cl.commandPrefix = append(cl.commandPrefix, cl.Discord.State.User.Mention())
+		cl.Config.CommandPrefix = cl.commandPrefix
 	}
 
 	// Create context for services
-	ctx := NewContext(bot, bot.Discord, termSignal)
+	ctx := NewContext(bot, cl.Discord, termSignal)
 
 	// Run services
-	for _, srv := range bot.serviceMap {
+	for _, srv := range cl.serviceMap {
 		if srv.Deactivated {
 			continue
 		}
@@ -162,18 +164,18 @@ func (bot *Bot) Run() error {
 	}
 
 	// create a add bot url
-	logrus.Info("Add bot using: https://discordapp.com/oauth2/authorize?scope=bot&client_id=" + bot.Discord.State.User.ID)
+	logrus.Info("Add bot using: https://discordapp.com/oauth2/authorize?scope=bot&client_id=" + cl.Discord.State.User.ID)
 
 	logrus.Info("Bot is now running.  Press CTRL-C to exit.")
 	termSignal = make(chan os.Signal, 1)
 	signal.Notify(termSignal, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-termSignal
 	fmt.Println("") // keep the `^C` on it's own line for prettiness
-	logrus.Info("Shutting down bot..")
+	logrus.Info("Shutting down cl..")
 
 	// Cleanly close down the Discord session.
 	logrus.Info("\tClosing WS discord connection .. ")
-	err = bot.Discord.Close()
+	err = cl.Discord.Close()
 	if err != nil {
 		return err
 	}
@@ -185,14 +187,14 @@ func (bot *Bot) Run() error {
 }
 
 // RegisterCommand ...
-func (bot *Bot) RegisterCommand(cmd *Command) error {
+func (cl *Client) RegisterCommand(cmd *unison.Command) error {
 	name := cmd.Name
-	if ex, exists := bot.commandMap[name]; exists {
+	if ex, exists := cl.commandMap[name]; exists {
 		return &DuplicateCommandError{Existing: ex, New: cmd, Name: name}
 	}
 
 	logrus.Info("[unison] Registerred command: " + cmd.Name)
-	bot.commandMap[name] = cmd.buildCommand()
+	cl.commandMap[name] = cmd.buildCommand()
 
 	// TODO: Register aliases
 
@@ -200,34 +202,34 @@ func (bot *Bot) RegisterCommand(cmd *Command) error {
 }
 
 // RegisterEventHook ...
-func (bot *Bot) RegisterEventHook(hook *EventHook) error {
+func (cl *Client) RegisterEventHook(hook *unison.EventHook) error {
 	name := hook.Name
-	if ex, exists := bot.eventHookMap[name]; exists {
+	if ex, exists := cl.eventHookMap[name]; exists {
 		return &DuplicateEventHookError{Existing: ex, New: hook}
 	}
-	bot.eventHookMap[name] = hook
+	cl.eventHookMap[name] = hook
 
 	if len(hook.Events) == 0 {
 		logrus.Warnf("Hook '%s' is not subscribed to any events", name)
 	}
 
-	bot.eventDispatcher.AddHook(hook)
+	cl.eventDispatcher.AddHook(hook)
 
 	return nil
 }
 
 // RegisterService ...
-func (bot *Bot) RegisterService(srv *Service) error {
+func (cl *Client) RegisterService(srv *unison.Service) error {
 	name := srv.Name
-	if ex, exists := bot.serviceMap[name]; exists {
+	if ex, exists := cl.serviceMap[name]; exists {
 		return &DuplicateServiceError{Existing: ex, New: srv, Name: name}
 	}
-	bot.serviceMap[name] = srv
+	cl.serviceMap[name] = srv
 
 	return nil
 }
 
-func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
+func (cl *Client) onEvent(ds *discordgo.Session, dv interface{}) {
 	// Inspect and wrap event
 	ev, err := events.NewDiscordEvent(dv)
 	if err != nil {
@@ -242,7 +244,7 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 	// TODO: check
 
 	// Invoke event hooks for the hooks that are subscribed to the event type
-	bot.eventDispatcher.Dispatch(ctx, ev, self)
+	cl.eventDispatcher.Dispatch(ctx, ev, self)
 
 	// Invoke command handler on new messages
 	if ev.Type == events.MessageCreateEvent {
@@ -254,41 +256,41 @@ func (bot *Bot) onEvent(ds *discordgo.Session, dv interface{}) {
 //
 
 // GetState retrieves the state for given guild
-func (bot *Bot) GetState(guildID string) (state.Type, error) {
-	if bot.DisableBoltDatabase {
+func (cl *Client) GetState(guildID string) (state.Type, error) {
+	if cl.DisableBoltDatabase {
 		return state.MissingState, ErrDatabaseDisabled
 	}
 	return state.GetGuildState(guildID)
 }
 
 // SetState updates state for given guild
-func (bot *Bot) SetState(guildID string, st state.Type) error {
-	if bot.DisableBoltDatabase {
+func (cl *Client) SetState(guildID string, st state.Type) error {
+	if cl.DisableBoltDatabase {
 		return ErrDatabaseDisabled
 	}
 	return state.SetGuildState(guildID, st)
 }
 
 // GetGuildValue returns a value from the bots key/value database
-func (bot *Bot) GetGuildValue(guildID, key string) ([]byte, error) {
-	if bot.DisableBoltDatabase {
+func (cl *Client) GetGuildValue(guildID, key string) ([]byte, error) {
+	if cl.DisableBoltDatabase {
 		return nil, ErrDatabaseDisabled
 	}
 	return state.GetGuildValue(guildID, key)
 }
 
 // SetGuildValue updates/inserts a key-value into the given guild bucket
-func (bot *Bot) SetGuildValue(guildID, key string, val []byte) error {
-	if bot.DisableBoltDatabase {
+func (cl *Client) SetGuildValue(guildID, key string, val []byte) error {
+	if cl.DisableBoltDatabase {
 		return ErrDatabaseDisabled
 	}
 	return state.SetGuildValue(guildID, key, val)
 }
 
 // SendMessage sends a string message to a given channel
-func (bot *Bot) SendMessage(channel *discord.Channel, msg string) (*discord.Message, error) {
+func (cl *Client) SendMessage(channel *discord.Channel, msg string) (*discord.Message, error) {
 	// TODO maybe add this a discord.Channel method, but need to store discord session when creating object
-	discordgoMessage, err := bot.Discord.ChannelMessageSend(channel.ID.String(), msg)
+	discordgoMessage, err := cl.Discord.ChannelMessageSend(channel.ID.String(), msg)
 	if err != nil {
 		return nil, err
 	}
@@ -299,10 +301,10 @@ func (bot *Bot) SendMessage(channel *discord.Channel, msg string) (*discord.Mess
 // Event listeners
 //
 
-func (bot *Bot) onReady(ds *discordgo.Session, r *discordgo.Ready) {
+func (cl *Client) onReady(ds *discordgo.Session, r *discordgo.Ready) {
 	// Set bot state
-	bot.readyState = r
-	bot.User = r.User
+	cl.readyState = r
+	cl.User = r.User
 
 	logrus.WithFields(logrus.Fields{
 		"ID":       r.User.ID,

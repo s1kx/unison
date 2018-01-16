@@ -1,4 +1,4 @@
-package unison_test
+package client_test
 
 import (
 	"github.com/s1kx/unison"

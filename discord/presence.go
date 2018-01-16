@@ -1,6 +1,6 @@
 package discord
 
-import "github.com/s1kx/unison/twitter/snowflake"
+import "github.com/s1kx/unison/discord/snowflake"
 
 type Presence struct {
 	User    *User          `json:"user"`

@@ -1,4 +1,4 @@
-package unison
+package main
 
 import (
 	"errors"
@@ -10,8 +10,8 @@ import (
 
 	"github.com/s1kx/discordgo"
 
+	"github.com/s1kx/unison/client"
 	"github.com/s1kx/unison/constant"
-	"github.com/s1kx/unison/session"
 	"github.com/s1kx/unison/state"
 )
 
@@ -23,6 +23,10 @@ var logFormatter = logrus.TextFormatter{
 var (
 	ErrMissingDiscordToken = errors.New("discord token is not configured")
 )
+
+func main() {
+	// Call Run()!
+}
 
 // Run is a convenience function for starting a session with the given Bot and coniguration.
 func Run(bot *Bot, conf *Config) error {
@@ -109,7 +113,7 @@ func Run(bot *Bot, conf *Config) error {
 	conf.BotState = uState
 
 	// Initialize and start bot
-	s, err := session.New(bot, conf, ds)
+	s, err := client.New(bot, conf, ds)
 	if err != nil {
 		return err
 	}

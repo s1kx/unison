@@ -3,7 +3,7 @@ package discord
 import (
 	"time"
 
-	"github.com/s1kx/unison/twitter/snowflake"
+	"github.com/s1kx/unison/discord/snowflake"
 )
 
 type GuildMember struct {

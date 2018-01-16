@@ -1,4 +1,4 @@
-package session
+package client_test
 
 import "testing"
 

@@ -1,4 +1,4 @@
-package session
+package client
 
 import (
 	"strings"
@@ -6,10 +6,11 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/s1kx/discordgo"
+	"github.com/s1kx/unison"
 	"github.com/s1kx/unison/state"
 )
 
-func handleMessageCreate(ctx *Context, m *discordgo.MessageCreate) {
+func handleMessageCreate(ctx *unison.Context, m *discordgo.MessageCreate) {
 	var err error
 	content := strings.TrimSpace(m.Content)
 

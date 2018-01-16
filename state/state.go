@@ -1,6 +1,7 @@
 package state
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"sync"
@@ -8,6 +9,10 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/s1kx/unison/constant"
+)
+
+var (
+	ErrDatabaseDisabled = errors.New("bolt(key-value) database is disabled")
 )
 
 // DatabaseError acts as an adapter for bolt errors.
