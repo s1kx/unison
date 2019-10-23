@@ -1,4 +1,5 @@
 # Unison
+> ARCHIVED. This project is no longer maintained.
 
 Unison is a framework for Discord chat bots written in Go.
 
